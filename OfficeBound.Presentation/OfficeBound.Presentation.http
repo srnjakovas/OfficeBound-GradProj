@@ -1,0 +1,6 @@
+@OfficeBound.Presentation_HostAddress = http://localhost:5281
+
+GET {{OfficeBound.Presentation_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
