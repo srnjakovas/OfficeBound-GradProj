@@ -1,6 +1,5 @@
-﻿namespace OfficeBound.Contracts.Dtos;
+﻿using OfficeBound.Domain.Enumerations;
 
-public class RequestDto
-{
-    
-}
+namespace OfficeBound.Contracts.Dtos;
+
+public record RequestDto(int Id, string Description, RequestType RequestType, DateTime CreatedDate);

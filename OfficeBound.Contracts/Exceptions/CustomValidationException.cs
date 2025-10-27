@@ -1,6 +1,13 @@
-﻿namespace OfficeBound.Contracts.Exceptions;
+﻿using OfficeBound.Contracts.Errors;
 
-public class CustomValidationException
+namespace OfficeBound.Contracts.Exceptions;
+
+public class CustomValidationException : Exception
 {
+    public CustomValidationException(List<ValidationError> validationErrors)
+    {
+        ValidationErrors = validationErrors;
+    }
     
+    public List<ValidationError> ValidationErrors { get; set; }
 }

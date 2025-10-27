@@ -1,3 +1,5 @@
-﻿namespace OfficeBound.Contracts.Responses;
+﻿using OfficeBound.Contracts.Dtos;
 
-public record GetRequestByIdResponse();
+namespace OfficeBound.Contracts.Responses;
+
+public record GetRequestByIdResponse(RequestDto RequestDto);

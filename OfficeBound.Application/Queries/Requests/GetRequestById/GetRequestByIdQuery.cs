@@ -1,3 +1,6 @@
-﻿namespace OfficeBound.Application.Queries.Requests.GetRequestById;
+﻿using MediatR;
+using OfficeBound.Contracts.Responses;
 
-public record GetRequestByIdQuery();
+namespace OfficeBound.Application.Queries.Requests.GetRequestById;
+
+public record GetRequestByIdQuery(int Id) : IRequest<GetRequestByIdResponse>;

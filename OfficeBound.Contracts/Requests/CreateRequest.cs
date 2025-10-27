@@ -1,6 +1,5 @@
-﻿namespace OfficeBound.Contracts.Requests;
+﻿using OfficeBound.Domain.Enumerations;
 
-public class CreateRequest
-{
-    
-}
+namespace OfficeBound.Contracts.Requests;
+
+public record CreateRequest(string Description, RequestType RequestType);

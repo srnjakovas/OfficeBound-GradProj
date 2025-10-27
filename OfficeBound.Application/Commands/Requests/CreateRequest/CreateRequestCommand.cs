@@ -1,3 +1,6 @@
-﻿namespace OfficeBound.Application.Commands.Requests.CreateRequest;
+﻿using MediatR;
+using OfficeBound.Domain.Enumerations;
 
-public record CreateRequestCommand();
+namespace OfficeBound.Application.Commands.Requests.CreateRequest;
+
+public record CreateRequestCommand(string Description, RequestType RequestType) : IRequest<int>;

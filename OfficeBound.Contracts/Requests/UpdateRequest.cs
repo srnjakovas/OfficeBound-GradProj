@@ -1,6 +1,5 @@
-﻿namespace OfficeBound.Contracts.Requests;
+﻿using OfficeBound.Domain.Enumerations;
 
-public class UpdateRequest
-{
-    
-}
+namespace OfficeBound.Contracts.Requests;
+
+public record UpdateRequest(string Description, RequestType RequestType);

@@ -1,3 +1,6 @@
-﻿namespace OfficeBound.Application.Queries.Requests.GetRequests;
+﻿using MediatR;
+using OfficeBound.Contracts.Responses;
 
-public record GetRequestsQuery();
+namespace OfficeBound.Application.Queries.Requests.GetRequests;
+
+public record GetRequestsQuery() : IRequest<GetRequestsResponse>;

@@ -1,6 +1,6 @@
 ﻿namespace OfficeBound.Contracts.Exceptions;
 
-public class NotFoundException
+public class NotFoundException(string message) : Exception(message)
 {
     
 }

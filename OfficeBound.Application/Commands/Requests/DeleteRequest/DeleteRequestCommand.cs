@@ -1,3 +1,5 @@
-﻿namespace OfficeBound.Application.Commands.Requests.DeleteRequest;
+﻿using MediatR;
 
-public record DeleteRequestCommand();
+namespace OfficeBound.Application.Commands.Requests.DeleteRequest;
+
+public record DeleteRequestCommand(int Id) : IRequest<Unit>;

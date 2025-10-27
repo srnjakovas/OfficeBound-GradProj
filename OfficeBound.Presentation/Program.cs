@@ -1,44 +1,41 @@
+using Microsoft.EntityFrameworkCore;
+using OfficeBound.Infrastructure;
+using OfficeBound.Application;
+using OfficeBound.Presentation.Handlers;
+using OfficeBound.Presentation.Modules;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var connection = builder.Configuration.GetConnectionString("DbConnectionString");
+builder.Services.AddDbContext<OfficeBoundDbContext>(opt =>
+    opt.UseSqlServer(connection));
+
+
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy("CorsPolicy", policyBuilder =>
+        {
+            policyBuilder.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173");
+        }
+    );
+});
+
+builder.Services.AddApplication();
+builder.Services.AddExceptionHandler<ExceptionHandler>();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+app.UseExceptionHandler(_ => { });
+app.UseCors("CorsPolicy");
 app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
-
+app.AddRequestsEndpoints();
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
