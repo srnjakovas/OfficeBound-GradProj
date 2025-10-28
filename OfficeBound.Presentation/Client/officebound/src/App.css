@@ -1,7 +1,80 @@
+/* Import Inter font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Modern Material-UI styling */
 body {
-    background-color: #EAEAEA !important;
+    margin: 0;
+    font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    min-height: 100vh;
 }
 
-.container-style {
-    margin-top: 7em;
+/* Dark mode body background */
+body.dark {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+/* Smooth transitions for better UX */
+* {
+    transition: all 0.2s ease-in-out;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-track {
+    background: #1e293b;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: #475569;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* Enhanced focus styles */
+*:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Improved button hover effects */
+.MuiButton-root {
+    position: relative;
+    overflow: hidden;
+}
+
+.MuiButton-root::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.MuiButton-root:hover::before {
+    left: 100%;
 }
