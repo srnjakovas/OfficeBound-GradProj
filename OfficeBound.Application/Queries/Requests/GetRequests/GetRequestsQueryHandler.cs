@@ -17,7 +17,8 @@ public class GetRequestsQueryHandler : IRequestHandler<GetRequestsQuery, GetRequ
     public async Task<GetRequestsResponse> Handle(GetRequestsQuery request, CancellationToken cancellationToken)
     {
         var requests = await _requestRepository.GetAllAsync(cancellationToken);
+        var requestsList = requests.ToList();
 
-        return requests.Adapt<GetRequestsResponse>();
+        return requestsList.Adapt<GetRequestsResponse>();
     }
 }

@@ -1,5 +1,10 @@
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using OfficeBound.Application.Services;
+using OfficeBound.Application.Commands.Requests.CreateRequest;
+using OfficeBound.Application.Commands.Requests.DeleteRequest;
+using OfficeBound.Application.Commands.Requests.UpdateRequest;
+using OfficeBound.Application.Queries.Requests.GetRequestById;
+using OfficeBound.Application.Queries.Requests.GetRequests;
 using OfficeBound.Contracts.Requests;
 using OfficeBound.Contracts.Responses;
 
@@ -10,11 +15,11 @@ namespace OfficeBound.Presentation.Controllers;
 [Produces("application/json")]
 public class RequestsController : ControllerBase
 {
-    private readonly IRequestService _requestService;
+    private readonly IMediator _mediator;
 
-    public RequestsController(IRequestService requestService)
+    public RequestsController(IMediator mediator)
     {
-        _requestService = requestService;
+        _mediator = mediator;
     }
 
     /// <summary>
@@ -24,8 +29,7 @@ public class RequestsController : ControllerBase
     [ProducesResponseType(typeof(GetRequestsResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<GetRequestsResponse>> GetRequests(CancellationToken cancellationToken)
     {
-        var requests = await _requestService.GetAllRequestsAsync(cancellationToken);
-        var response = new GetRequestsResponse(requests.ToList());
+        var response = await _mediator.Send(new GetRequestsQuery(), cancellationToken);
         return Ok(response);
     }
 
@@ -37,8 +41,7 @@ public class RequestsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<GetRequestByIdResponse>> GetRequestById(int id, CancellationToken cancellationToken)
     {
-        var request = await _requestService.GetRequestByIdAsync(id, cancellationToken);
-        var response = new GetRequestByIdResponse(request);
+        var response = await _mediator.Send(new GetRequestByIdQuery(id), cancellationToken);
         return Ok(response);
     }
 
@@ -50,11 +53,8 @@ public class RequestsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<int>> CreateRequest([FromBody] CreateRequest createRequest, CancellationToken cancellationToken)
     {
-        var requestId = await _requestService.CreateRequestAsync(
-            createRequest.Description, 
-            createRequest.RequestType, 
-            cancellationToken);
-        
+        var command = new CreateRequestCommand(createRequest.Description, createRequest.RequestType);
+        var requestId = await _mediator.Send(command, cancellationToken);
         return Ok(requestId);
     }
 
@@ -67,7 +67,8 @@ public class RequestsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> UpdateRequest(int id, [FromBody] UpdateRequest updateRequest, CancellationToken cancellationToken)
     {
-        await _requestService.UpdateRequestAsync(id, updateRequest.Description, updateRequest.RequestType, cancellationToken);
+        var command = new UpdateRequestCommand(id, updateRequest.Description, updateRequest.RequestType);
+        await _mediator.Send(command, cancellationToken);
         return Ok();
     }
 
@@ -79,7 +80,8 @@ public class RequestsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> DeleteRequest(int id, CancellationToken cancellationToken)
     {
-        await _requestService.DeleteRequestAsync(id, cancellationToken);
+        var command = new DeleteRequestCommand(id);
+        await _mediator.Send(command, cancellationToken);
         return Ok();
     }
 }
