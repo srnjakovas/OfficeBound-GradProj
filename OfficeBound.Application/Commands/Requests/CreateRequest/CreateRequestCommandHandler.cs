@@ -1,16 +1,20 @@
 ﻿using MediatR;
+using OfficeBound.Application.Interfaces;
 using OfficeBound.Domain.Entities;
-using OfficeBound.Infrastructure;
+using OfficeBound.Domain.Enumerations;
+using OfficeBound.Domain.Repositories;
 
 namespace OfficeBound.Application.Commands.Requests.CreateRequest;
 
 public class CreateRequestCommandHandler : IRequestHandler<CreateRequestCommand, int>
 {
-    private readonly OfficeBoundDbContext _officeBoundDbContext;
+    private readonly IRequestRepository _requestRepository;
+    private readonly IUnitOfWork _unitOfWork;
     
-    public CreateRequestCommandHandler(OfficeBoundDbContext  officeBoundDbContext)
+    public CreateRequestCommandHandler(IRequestRepository requestRepository, IUnitOfWork unitOfWork)
     {
-        _officeBoundDbContext = officeBoundDbContext;
+        _requestRepository = requestRepository;
+        _unitOfWork = unitOfWork;
     }
     
     public async Task<int> Handle(CreateRequestCommand requestCommand, CancellationToken cancellationToken)
@@ -19,11 +23,13 @@ public class CreateRequestCommandHandler : IRequestHandler<CreateRequestCommand,
         {
             Description = requestCommand.Description,
             RequestType = requestCommand.RequestType,
-            CreatedDate = DateTime.Now.ToUniversalTime()
+            RequestDate = DateTime.UtcNow,
+            CreatedDate = DateTime.UtcNow,
+            RequestStatus = RequestStatus.Pending
         };
 
-        await _officeBoundDbContext.Requests.AddAsync(request, cancellationToken);
-        await _officeBoundDbContext.SaveChangesAsync(cancellationToken);
+        await _requestRepository.AddAsync(request, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return request.Id;
     }

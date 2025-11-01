@@ -4,6 +4,7 @@ using Mapster;
 using Microsoft.Extensions.DependencyInjection;
 using OfficeBound.Application.Behaviors;
 using OfficeBound.Application.Mappings;
+using OfficeBound.Application.Services;
 
 namespace OfficeBound.Application;
 
@@ -16,6 +17,9 @@ public static class DependencyInjection
             cf.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
             cf.AddOpenBehavior(typeof(ValidationBehavior<,>));
         });
+        
+        // Register services
+        services.AddScoped<IRequestService, RequestService>();
         
         MappingConfig.Configure();
         var config = TypeAdapterConfig.GlobalSettings;
