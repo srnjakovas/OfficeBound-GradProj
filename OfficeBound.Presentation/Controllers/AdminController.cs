@@ -22,7 +22,7 @@ public class AdminController : ControllerBase
     /// <summary>
     /// Get all unreviewed user account requests
     /// </summary>
-    [HttpGet("account-requests")]
+    [HttpGet("AccountRequests")]
     [ProducesResponseType(typeof(GetUserAccountRequestsResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<GetUserAccountRequestsResponse>> GetUserAccountRequests(CancellationToken cancellationToken)
     {
@@ -33,7 +33,7 @@ public class AdminController : ControllerBase
     /// <summary>
     /// Review and approve/reject a user account request
     /// </summary>
-    [HttpPost("review-account")]
+    [HttpPost("ReviewAccount")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

@@ -22,7 +22,7 @@ public class AuthController : ControllerBase
     /// <summary>
     /// Sign up for a new account
     /// </summary>
-    [HttpPost("signup")]
+    [HttpPost("SignUp")]
     [ProducesResponseType(typeof(SignUpResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<SignUpResponse>> SignUp([FromBody] SignUpRequest signUpRequest, CancellationToken cancellationToken)
@@ -35,7 +35,7 @@ public class AuthController : ControllerBase
     /// <summary>
     /// Login to the system
     /// </summary>
-    [HttpPost("login")]
+    [HttpPost("Login")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

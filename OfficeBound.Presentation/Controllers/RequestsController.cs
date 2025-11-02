@@ -72,7 +72,7 @@ public class RequestsController : ControllerBase
         return Ok();
     }
 
-    [HttpPost("{id}/approve")]
+    [HttpPost("{id}/Approve")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -83,7 +83,7 @@ public class RequestsController : ControllerBase
         return Ok();
     }
 
-    [HttpPost("{id}/reject")]
+    [HttpPost("{id}/Reject")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
