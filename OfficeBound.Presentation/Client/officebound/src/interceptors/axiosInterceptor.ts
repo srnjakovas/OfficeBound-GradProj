@@ -1,4 +1,4 @@
-﻿import axios, {type AxiosResponse} from "axios";
+﻿import axios, {type AxiosResponse, type AxiosError} from "axios";
 
 let isInterceptorSetup = false;
 
@@ -6,28 +6,30 @@ export const setupErrorHandlingInterceptor = () => {
     if(!isInterceptorSetup) {
         axios.interceptors.response.use(
             (response: AxiosResponse) => response,
-            (error) => {
+            (error: AxiosError) => {
                 if(error.response) {
-                    const statusCode = error.response.statusCode;
-                    const data = error.response.data;
+                    const statusCode = error.response.status;
+                    const data = error.response.data as any;
                     
                     switch (statusCode) {
                         case 400:
-                            if (data.errors) {
+                            const errors = data.errors || data.extensions?.errors || [];
+                            
+                            if (errors && Array.isArray(errors) && errors.length > 0) {
                                 const modalStateErrors = [];
                                 
-                                for (const item of data.errors) {
-                                    const property = item.property;
-                                    const errorMessage = item.errorMessage;
+                                for (const item of errors) {
+                                    const property = item.Property || item.property;
+                                    const errorMessage = item.ErrorMessage || item.errorMessage;
                                     
                                     if (property && errorMessage) {
                                         modalStateErrors.push({property, errorMessage});
                                     }
-                                    
-                                    
                                 }
                                 
-                                console.log(modalStateErrors);
+                                console.log('Validation errors:', modalStateErrors);
+                            } else {
+                                console.log('Bad Request:', data);
                             }
                             break;
                             
@@ -44,8 +46,12 @@ export const setupErrorHandlingInterceptor = () => {
                             break;
                             
                         default:
-                            console.log('Generic Error');
+                            console.log('Generic Error:', statusCode, data);
                     }
+                } else if (error.request) {
+                    console.log('No response received:', error.request);
+                } else {
+                    console.log('Error setting up request:', error.message);
                 }
                 
                 return Promise.reject(error);

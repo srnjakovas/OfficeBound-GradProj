@@ -1,6 +1,7 @@
-﻿import { AppBar, Toolbar, Typography, Button, Box, IconButton, Menu, MenuItem, useMediaQuery, useTheme, Avatar } from '@mui/material';
-import { Menu as MenuIcon, DarkMode, LightMode, Star, Login, Info } from '@mui/icons-material';
+﻿import { AppBar, Toolbar, Typography, Button, Box, IconButton, Menu, MenuItem, useMediaQuery, useTheme, Avatar, Tooltip } from '@mui/material';
+import { Menu as MenuIcon, DarkMode, LightMode, Assignment, Business, Login } from '@mui/icons-material';
 import { useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import Logo from '../../assets/images/office-bound-logo.jpg';
 
 interface HeaderProps {
@@ -12,6 +13,7 @@ export default function Header({ darkMode, setDarkMode }: HeaderProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const location = useLocation();
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -51,7 +53,8 @@ export default function Header({ darkMode, setDarkMode }: HeaderProps) {
           />
           <Typography 
             variant="h5" 
-            component="div" 
+            component={NavLink}
+            to="/"
             sx={{ 
               fontWeight: 700,
               background: darkMode 
@@ -61,29 +64,122 @@ export default function Header({ darkMode, setDarkMode }: HeaderProps) {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               textShadow: darkMode ? '0 2px 4px rgba(0, 0, 0, 0.3)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+              textDecoration: 'none',
             }}
           >
             OfficeBound
           </Typography>
         </Box>
         
+        {/* Navigation Links */}
+        <Box sx={{ display: 'flex', gap: 1, mr: 2 }}>
+          <Button
+            component={NavLink}
+            to="/"
+            color="inherit"
+            startIcon={<Assignment />}
+            sx={{
+              textTransform: 'none',
+              fontWeight: 500,
+              px: 2,
+              py: 1,
+              borderRadius: 2,
+              backgroundColor: location.pathname === '/' || location.pathname.includes('Request') 
+                ? 'rgba(255, 255, 255, 0.2)' 
+                : 'rgba(255, 255, 255, 0.1)',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              },
+              transition: 'all 0.3s ease',
+            }}
+          >
+            Requests
+          </Button>
+          <Button
+            component={NavLink}
+            to="/departments"
+            color="inherit"
+            startIcon={<Business />}
+            sx={{
+              textTransform: 'none',
+              fontWeight: 500,
+              px: 2,
+              py: 1,
+              borderRadius: 2,
+              backgroundColor: location.pathname.includes('Department')
+                ? 'rgba(255, 255, 255, 0.2)' 
+                : 'rgba(255, 255, 255, 0.1)',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              },
+              transition: 'all 0.3s ease',
+            }}
+          >
+            Departments
+          </Button>
+        </Box>
+        
         <Box sx={{ flexGrow: 1 }} />
         
-        {/* Dark Mode Toggle */}
-        <IconButton
-          onClick={toggleDarkMode}
+        {/* Sign In Button */}
+        <Button
           color="inherit"
+          startIcon={<Login />}
           sx={{
-            mr: 2,
-            backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.2)',
+            mr: 1,
+            textTransform: 'none',
+            fontWeight: 500,
+            px: 2,
+            py: 1,
+            borderRadius: 2,
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
             '&:hover': {
-              backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.3)',
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
             },
             transition: 'all 0.3s ease',
           }}
         >
-          {darkMode ? <LightMode /> : <DarkMode />}
-        </IconButton>
+          Sign in
+        </Button>
+        
+        {/* Log In Button */}
+        <Button
+          color="inherit"
+          startIcon={<Login />}
+          sx={{
+            mr: 2,
+            textTransform: 'none',
+            fontWeight: 500,
+            px: 2,
+            py: 1,
+            borderRadius: 2,
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            },
+            transition: 'all 0.3s ease',
+          }}
+        >
+          Log in
+        </Button>
+        
+        {/* Dark Mode Toggle */}
+        <Tooltip title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}>
+          <IconButton
+            onClick={toggleDarkMode}
+            color="inherit"
+            aria-label="toggle dark mode"
+            sx={{
+              backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.2)',
+              '&:hover': {
+                backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.3)',
+              },
+              transition: 'all 0.3s ease',
+            }}
+          >
+            {darkMode ? <LightMode /> : <DarkMode />}
+          </IconButton>
+        </Tooltip>
         
         {isMobile ? (
           <>
@@ -126,78 +222,17 @@ export default function Header({ darkMode, setDarkMode }: HeaderProps) {
                 }
               }}
             >
-            <MenuItem onClick={handleClose}>
-              <Info sx={{ mr: 1 }} />
-              Features
+            <MenuItem component={NavLink} to="/" onClick={handleClose}>
+              <Assignment sx={{ mr: 1 }} />
+              Requests
             </MenuItem>
-            <MenuItem onClick={handleClose}>
-              <Star sx={{ mr: 1 }} />
-              Testimonials
-            </MenuItem>
-            <MenuItem onClick={handleClose}>
-              <Login sx={{ mr: 1 }} />
-              Sign In
+            <MenuItem component={NavLink} to="/departments" onClick={handleClose}>
+              <Business sx={{ mr: 1 }} />
+              Departments
             </MenuItem>
             </Menu>
           </>
-        ) : (
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button 
-              color="inherit" 
-              startIcon={<Info />}
-              sx={{ 
-                textTransform: 'none',
-                fontWeight: 500,
-                px: 2,
-                py: 1,
-                borderRadius: 2,
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                },
-                transition: 'all 0.3s ease',
-              }}
-            >
-              Features
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<Star />}
-              sx={{ 
-                textTransform: 'none',
-                fontWeight: 500,
-                px: 2,
-                py: 1,
-                borderRadius: 2,
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                },
-                transition: 'all 0.3s ease',
-              }}
-            >
-              Testimonials
-            </Button>
-            <Button 
-              color="inherit" 
-              startIcon={<Login />}
-              sx={{ 
-                textTransform: 'none',
-                fontWeight: 500,
-                px: 2,
-                py: 1,
-                borderRadius: 2,
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                },
-                transition: 'all 0.3s ease',
-              }}
-            >
-              Sign In
-            </Button>
-          </Box>
-        )}
+        ) : null}
       </Toolbar>
     </AppBar>
   );

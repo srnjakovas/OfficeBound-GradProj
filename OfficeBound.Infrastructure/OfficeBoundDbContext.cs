@@ -9,6 +9,18 @@ public class OfficeBoundDbContext : DbContext
     {
     }
 
-    
     public DbSet<Request> Requests => Set<Request>();
+
+    public DbSet<Department> Departments => Set<Department>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Request>()
+            .HasOne(r => r.Department)
+            .WithMany()
+            .HasForeignKey(r => r.DepartmentId)
+            .OnDelete(DeleteBehavior.SetNull);
+    }
 }

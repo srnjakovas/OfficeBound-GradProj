@@ -1,28 +1,27 @@
-using Microsoft.EntityFrameworkCore;
-using OfficeBound.Infrastructure;
 using OfficeBound.Application;
+using OfficeBound.Infrastructure;
 using OfficeBound.Presentation.Handlers;
-using OfficeBound.Presentation.Modules;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-var connection = builder.Configuration.GetConnectionString("DbConnectionString");
-builder.Services.AddDbContext<OfficeBoundDbContext>(opt =>
-    opt.UseSqlServer(connection));
-
 
 builder.Services.AddCors(opt =>
 {
     opt.AddPolicy("CorsPolicy", policyBuilder =>
         {
-            policyBuilder.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173");
+            policyBuilder.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5174", "http://localhost:5173");
         }
     );
 });
 
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 builder.Services.AddExceptionHandler<ExceptionHandler>();
 
@@ -37,5 +36,6 @@ if (app.Environment.IsDevelopment())
 app.UseExceptionHandler(_ => { });
 app.UseCors("CorsPolicy");
 app.UseHttpsRedirection();
-app.AddRequestsEndpoints();
+app.UseAuthorization();
+app.MapControllers();
 app.Run();

@@ -1,25 +1,23 @@
 import './App.css'
-import RequestsTable from "./components/requests/RequestsTable.tsx";
-import {Outlet, useLocation} from "react-router-dom";
+import {Outlet} from "react-router-dom";
 import Header from "./components/header/Header.tsx";
 import Footer from "./components/footer/Footer.tsx";
 import {useEffect, useState} from "react";
 import {setupErrorHandlingInterceptor} from "./interceptors/axiosInterceptor.ts";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CssBaseline, Container, Box } from '@mui/material';
+import { CssBaseline, Box } from '@mui/material';
 
-// Enhanced theme with better colors and dark mode support
 const lightTheme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#2563eb', // Modern blue
+      main: '#2563eb',
       light: '#3b82f6',
       dark: '#1d4ed8',
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#7c3aed', // Modern purple
+      main: '#7c3aed',
       light: '#8b5cf6',
       dark: '#6d28d9',
       contrastText: '#ffffff',
@@ -102,13 +100,13 @@ const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#3b82f6', // Brighter blue for dark mode
+      main: '#3b82f6',
       light: '#60a5fa',
       dark: '#2563eb',
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#8b5cf6', // Brighter purple for dark mode
+      main: '#8b5cf6',
       light: '#a78bfa',
       dark: '#7c3aed',
       contrastText: '#ffffff',
@@ -188,7 +186,6 @@ const darkTheme = createTheme({
 });
 
 function App() {
-    const location = useLocation();
     const [darkMode, setDarkMode] = useState(() => {
       const saved = localStorage.getItem('darkMode');
       return saved ? JSON.parse(saved) : true;
@@ -200,7 +197,6 @@ function App() {
 
     useEffect(() => {
         localStorage.setItem('darkMode', JSON.stringify(darkMode));
-        // Apply dark class to body for CSS styling
         if (darkMode) {
             document.body.classList.add('dark');
         } else {
@@ -213,12 +209,8 @@ function App() {
       <CssBaseline />
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Header darkMode={darkMode} setDarkMode={setDarkMode} />
-        <Box component="main" sx={{ flexGrow: 1, py: 3 }}>
-          {location.pathname === '/' ? <RequestsTable /> : (
-            <Container maxWidth="lg">
-              <Outlet />
-            </Container>
-          )}
+        <Box component="main" sx={{ flexGrow: 1 }}>
+          <Outlet />
         </Box>
         <Footer />
       </Box>

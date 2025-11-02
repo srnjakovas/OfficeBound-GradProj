@@ -1,24 +1,24 @@
 ﻿using Mapster;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using OfficeBound.Contracts.Responses;
-using OfficeBound.Infrastructure;
+using OfficeBound.Domain.Repositories;
 
 namespace OfficeBound.Application.Queries.Requests.GetRequests;
 
 public class GetRequestsQueryHandler : IRequestHandler<GetRequestsQuery, GetRequestsResponse>
 {
-    private readonly OfficeBoundDbContext _officeBoundDbContext;
+    private readonly IRequestRepository _requestRepository;
 
-    public GetRequestsQueryHandler(OfficeBoundDbContext officeBoundDbContext)
+    public GetRequestsQueryHandler(IRequestRepository requestRepository)
     {
-        _officeBoundDbContext = officeBoundDbContext;
+        _requestRepository = requestRepository;
     }
     
     public async Task<GetRequestsResponse> Handle(GetRequestsQuery request, CancellationToken cancellationToken)
     {
-        var requests = await _officeBoundDbContext.Requests.ToListAsync(cancellationToken);
+        var requests = await _requestRepository.GetAllAsync(cancellationToken);
+        var requestsList = requests.ToList();
 
-        return requests.Adapt<GetRequestsResponse>();
+        return requestsList.Adapt<GetRequestsResponse>();
     }
 }

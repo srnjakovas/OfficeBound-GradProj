@@ -13,4 +13,8 @@ public class Request : BaseEntity
     public DateTime RequestDate { get; set; }
 
     public RequestStatus RequestStatus { get; set; } = RequestStatus.Pending;
+
+    public int? DepartmentId { get; set; }
+    
+    public Department? Department { get; set; }
 }

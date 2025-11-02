@@ -1,31 +1,33 @@
 ﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
+using OfficeBound.Application.Interfaces;
 using OfficeBound.Contracts.Exceptions;
 using OfficeBound.Domain.Entities;
-using OfficeBound.Infrastructure;
+using OfficeBound.Domain.Repositories;
 
 namespace OfficeBound.Application.Commands.Requests.DeleteRequest;
 
 public class DeleteRequestCommandHandler : IRequestHandler<DeleteRequestCommand, Unit>
 {
-    private readonly OfficeBoundDbContext _officeBoundDbContext;
+    private readonly IRequestRepository _requestRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public DeleteRequestCommandHandler(OfficeBoundDbContext officeBoundDbContext)
+    public DeleteRequestCommandHandler(IRequestRepository requestRepository, IUnitOfWork unitOfWork)
     {
-        _officeBoundDbContext = officeBoundDbContext;
+        _requestRepository = requestRepository;
+        _unitOfWork = unitOfWork;
     }
     
     public async Task<Unit> Handle(DeleteRequestCommand request, CancellationToken cancellationToken)
     {
-        var requestToDelete = await _officeBoundDbContext.Requests.FirstOrDefaultAsync(r => r.Id == request.Id, cancellationToken);
+        var requestToDelete = await _requestRepository.GetByIdAsync(request.Id, cancellationToken);
 
         if (requestToDelete is null)
         {
-            throw new NotFoundException($"{nameof(Request)} with Id: {request.Id} was not found to Database)");
+            throw new NotFoundException($"{nameof(Request)} with Id: {request.Id} was not found in Database");
         }
 
-        _officeBoundDbContext.Requests.Remove(requestToDelete);
-        await _officeBoundDbContext.SaveChangesAsync(cancellationToken);
+        await _requestRepository.DeleteAsync(requestToDelete, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         return Unit.Value;
     }
