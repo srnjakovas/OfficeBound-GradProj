@@ -17,10 +17,37 @@ namespace OfficeBound.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.1")
+                .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("OfficeBound.Domain.Entities.Department", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DepartmentName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Manager")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NumberOfPeople")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Departments");
+                });
 
             modelBuilder.Entity("OfficeBound.Domain.Entities.Request", b =>
                 {
@@ -32,6 +59,9 @@ namespace OfficeBound.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -51,7 +81,19 @@ namespace OfficeBound.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DepartmentId");
+
                     b.ToTable("Requests");
+                });
+
+            modelBuilder.Entity("OfficeBound.Domain.Entities.Request", b =>
+                {
+                    b.HasOne("OfficeBound.Domain.Entities.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Department");
                 });
 #pragma warning restore 612, 618
         }

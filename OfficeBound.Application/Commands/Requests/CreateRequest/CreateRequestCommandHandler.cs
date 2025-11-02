@@ -19,13 +19,16 @@ public class CreateRequestCommandHandler : IRequestHandler<CreateRequestCommand,
     
     public async Task<int> Handle(CreateRequestCommand requestCommand, CancellationToken cancellationToken)
     {
+        var defaultRequestDate = DateTime.Today.AddDays(1).ToUniversalTime();
+        
         var request = new Request
         {
             Description = requestCommand.Description,
             RequestType = requestCommand.RequestType,
-            RequestDate = DateTime.UtcNow,
+            RequestDate = requestCommand.RequestDate?.ToUniversalTime() ?? defaultRequestDate,
             CreatedDate = DateTime.UtcNow,
-            RequestStatus = RequestStatus.Pending
+            RequestStatus = RequestStatus.Pending,
+            DepartmentId = requestCommand.DepartmentId
         };
 
         await _requestRepository.AddAsync(request, cancellationToken);

@@ -28,6 +28,12 @@ public class UpdateRequestCommandHandler : IRequestHandler<UpdateRequestCommand,
 
         requestToUpdate.Description = request.Description;
         requestToUpdate.RequestType = request.RequestType;
+        requestToUpdate.DepartmentId = request.DepartmentId;
+        
+        if (request.RequestDate.HasValue)
+        {
+            requestToUpdate.RequestDate = request.RequestDate.Value.ToUniversalTime();
+        }
 
         await _requestRepository.UpdateAsync(requestToUpdate, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

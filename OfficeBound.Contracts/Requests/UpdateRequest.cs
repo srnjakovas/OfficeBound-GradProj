@@ -2,4 +2,4 @@
 
 namespace OfficeBound.Contracts.Requests;
 
-public record UpdateRequest(string Description, RequestType RequestType);
+public record UpdateRequest(string Description, RequestType RequestType, DateTime? RequestDate, int? DepartmentId);

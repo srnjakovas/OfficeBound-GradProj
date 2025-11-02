@@ -1,5 +1,4 @@
-﻿using Mapster;
-using MediatR;
+﻿using MediatR;
 using OfficeBound.Contracts.Exceptions;
 using OfficeBound.Contracts.Responses;
 using OfficeBound.Domain.Entities;
@@ -10,21 +9,32 @@ namespace OfficeBound.Application.Queries.Requests.GetRequestById;
 public class GetRequestByIdQueryHandler : IRequestHandler<GetRequestByIdQuery, GetRequestByIdResponse>
 {
     private readonly IRequestRepository _requestRepository;
-    
     public GetRequestByIdQueryHandler(IRequestRepository requestRepository)
     {
         _requestRepository = requestRepository;
     }
-    
+
     public async Task<GetRequestByIdResponse> Handle(GetRequestByIdQuery request, CancellationToken cancellationToken)
     {
-        var requestById = await _requestRepository.GetByIdAsync(request.Id, cancellationToken);
+        var requestById = await _requestRepository.GetByIdAsync(request.Id);
 
         if (requestById is null)
         {
             throw new NotFoundException($"{nameof(Request)} with Id: {request.Id} was not found in Database");
         }
 
-        return requestById.Adapt<GetRequestByIdResponse>();
+        var requestDto = new Contracts.Dtos.RequestDto(
+            requestById.Id,
+            requestById.Description,
+            requestById.RequestType,
+            requestById.CreatedDate,
+            requestById.RequestDate,
+            requestById.RequestStatus,
+            requestById.RejectionReason,
+            requestById.DepartmentId,
+            requestById.Department?.DepartmentName
+        );
+
+        return new GetRequestByIdResponse(requestDto);
     }
 }

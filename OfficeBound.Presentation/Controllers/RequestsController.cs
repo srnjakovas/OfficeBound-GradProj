@@ -22,9 +22,6 @@ public class RequestsController : ControllerBase
         _mediator = mediator;
     }
 
-    /// <summary>
-    /// Get all requests
-    /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(GetRequestsResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<GetRequestsResponse>> GetRequests(CancellationToken cancellationToken)
@@ -33,9 +30,6 @@ public class RequestsController : ControllerBase
         return Ok(response);
     }
 
-    /// <summary>
-    /// Get request by ID
-    /// </summary>
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(GetRequestByIdResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -45,36 +39,27 @@ public class RequestsController : ControllerBase
         return Ok(response);
     }
 
-    /// <summary>
-    /// Create a new request
-    /// </summary>
     [HttpPost]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<int>> CreateRequest([FromBody] CreateRequest createRequest, CancellationToken cancellationToken)
     {
-        var command = new CreateRequestCommand(createRequest.Description, createRequest.RequestType);
+        var command = new CreateRequestCommand(createRequest.Description, createRequest.RequestType, createRequest.RequestDate, createRequest.DepartmentId);
         var requestId = await _mediator.Send(command, cancellationToken);
         return Ok(requestId);
     }
 
-    /// <summary>
-    /// Update an existing request
-    /// </summary>
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> UpdateRequest(int id, [FromBody] UpdateRequest updateRequest, CancellationToken cancellationToken)
     {
-        var command = new UpdateRequestCommand(id, updateRequest.Description, updateRequest.RequestType);
+        var command = new UpdateRequestCommand(id, updateRequest.Description, updateRequest.RequestType, updateRequest.RequestDate, updateRequest.DepartmentId);
         await _mediator.Send(command, cancellationToken);
         return Ok();
     }
 
-    /// <summary>
-    /// Delete a request
-    /// </summary>
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

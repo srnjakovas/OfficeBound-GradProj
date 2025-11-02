@@ -1,8 +1,20 @@
-﻿import {useEffect, useState} from "react";
+﻿import {useEffect, useState, useMemo} from "react";
 import type {RequestDto} from "../../models/requestDto.ts";
+import type {DepartmentDto} from "../../models/departmentDto.ts";
 import apiConnector from "../../api/apiConnector.ts";
-import {Button, Container, Paper, Typography, Box, Fab, Chip, useTheme} from "@mui/material";
-import {Add as AddIcon, Assignment as AssignmentIcon, TrendingUp as TrendingUpIcon, CheckCircle as CheckCircleIcon} from "@mui/icons-material";
+import {Button, Container, Paper, Typography, Box, Fab, Chip, useTheme, ToggleButton, ToggleButtonGroup, FormControl, InputLabel, Select, MenuItem, TextField} from "@mui/material";
+import {
+    Add as AddIcon, 
+    Assignment as AssignmentIcon, 
+    TrendingUp as TrendingUpIcon, 
+    CheckCircle as CheckCircleIcon,
+    Pending as PendingIcon,
+    Cancel as CancelIcon,
+    Block as BlockIcon,
+    Schedule as ScheduleIcon,
+    Business as BusinessIcon,
+    FilterAlt as FilterAltIcon
+} from "@mui/icons-material";
 import RequestsTableItem from "./RequestsTableItem.tsx";
 import {NavLink} from "react-router-dom";
 import {
@@ -14,19 +26,70 @@ import {
   TableRow,
 } from '@mui/material';
 
+type StatusFilter = number | null;
+
 export default function RequestsTable () {
     const [requests, setRequests] = useState<RequestDto[]>([]);
+    const [departments, setDepartments] = useState<DepartmentDto[]>([]);
+    const [statusFilter, setStatusFilter] = useState<StatusFilter>(null);
+    const [departmentFilter, setDepartmentFilter] = useState<number | null>(null);
+    const [dateFilter, setDateFilter] = useState<string>('');
     const theme = useTheme();
     const isDark = theme.palette.mode === 'dark';
     
     useEffect(() => {
         const fetchData = async () => {
-            const fetchedRequests = await apiConnector.getRequests();
+            const [fetchedRequests, fetchedDepartments] = await Promise.all([
+                apiConnector.getRequests(),
+                apiConnector.getDepartments()
+            ]);
             setRequests(fetchedRequests);
+            setDepartments(fetchedDepartments);
         }
         
         fetchData();
-    }, [])
+    }, []);
+
+    const filteredRequests = useMemo(() => {
+        let filtered = requests;
+        
+        if (statusFilter !== null) {
+            filtered = filtered.filter(request => request.requestStatus === statusFilter);
+        }
+        
+        if (departmentFilter !== null) {
+            filtered = filtered.filter(request => request.departmentId === departmentFilter);
+        }
+        
+        if (dateFilter) {
+            const filterDate = new Date(dateFilter + 'T00:00:00').toDateString();
+            filtered = filtered.filter(request => {
+                if (!request.requestDate) return false;
+                const requestDate = new Date(request.requestDate).toDateString();
+                return requestDate === filterDate;
+            });
+        }
+        
+        return filtered;
+    }, [requests, statusFilter, departmentFilter, dateFilter]);
+
+    const statusCounts = useMemo(() => {
+        return {
+            all: requests.length,
+            approved: requests.filter(r => r.requestStatus === 0).length,
+            rejected: requests.filter(r => r.requestStatus === 1).length,
+            cancelled: requests.filter(r => r.requestStatus === 2).length,
+            pending: requests.filter(r => r.requestStatus === 3).length,
+            expired: requests.filter(r => r.requestStatus === 4).length,
+        };
+    }, [requests]);
+
+    const handleStatusFilterChange = (
+        event: React.MouseEvent<HTMLElement>,
+        newFilter: StatusFilter,
+    ) => {
+        setStatusFilter(newFilter);
+    };
     
     return (
         <Container maxWidth="lg" sx={{ py: 3 }}>
@@ -64,21 +127,108 @@ export default function RequestsTable () {
                 <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
                     Manage and track all office requests in one place
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                
+                {/* Filters Section */}
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', mb: 2, p: 2, bgcolor: isDark ? 'rgba(51, 65, 85, 0.5)' : 'rgba(241, 245, 249, 0.8)', borderRadius: 2 }}>
+                    <FilterAltIcon sx={{ color: 'text.secondary' }} />
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ mr: 1 }}>
+                        Filters:
+                    </Typography>
+                    
+                    <FormControl sx={{ minWidth: 180 }} size="small">
+                        <InputLabel>Department</InputLabel>
+                        <Select
+                            value={departmentFilter || ''}
+                            onChange={(e) => setDepartmentFilter(e.target.value === '' ? null : Number(e.target.value))}
+                            label="Department"
+                        >
+                            <MenuItem value="">All Departments</MenuItem>
+                            {departments.map((dept) => (
+                                <MenuItem key={dept.id} value={dept.id}>
+                                    {dept.departmentName}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    
+                    <TextField
+                        label="Filter by Date"
+                        type="date"
+                        value={dateFilter}
+                        onChange={(e) => setDateFilter(e.target.value)}
+                        size="small"
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        sx={{ minWidth: 180 }}
+                    />
+                    
+                    {(departmentFilter !== null || dateFilter) && (
+                        <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={() => {
+                                setDepartmentFilter(null);
+                                setDateFilter('');
+                            }}
+                        >
+                            Clear Filters
+                        </Button>
+                    )}
+                </Box>
+                
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', mb: 2 }}>
                     <Chip 
                         icon={<TrendingUpIcon />}
-                        label={`${requests.length} Total Requests`} 
+                        label={`${filteredRequests.length} ${departmentFilter !== null || dateFilter ? 'Filtered' : 'Total'} Requests`} 
                         color="primary" 
                         variant="outlined"
                         size="small"
                     />
-                    <Chip 
-                        icon={<CheckCircleIcon />}
-                        label="Active" 
-                        color="success" 
-                        variant="outlined"
+                    <ToggleButtonGroup
+                        value={statusFilter}
+                        exclusive
+                        onChange={handleStatusFilterChange}
+                        aria-label="status filter"
                         size="small"
-                    />
+                        sx={{
+                            '& .MuiToggleButton-root': {
+                                textTransform: 'none',
+                                border: `1px solid ${isDark ? '#475569' : '#cbd5e1'}`,
+                                '&.Mui-selected': {
+                                    backgroundColor: isDark ? '#3b82f6' : '#2563eb',
+                                    color: 'white',
+                                    '&:hover': {
+                                        backgroundColor: isDark ? '#2563eb' : '#1d4ed8',
+                                    },
+                                },
+                            },
+                        }}
+                    >
+                        <ToggleButton value={null} aria-label="all">
+                            All ({statusCounts.all})
+                        </ToggleButton>
+                        <ToggleButton value={3} aria-label="pending">
+                            <PendingIcon sx={{ mr: 0.5, fontSize: 16 }} />
+                            Pending ({statusCounts.pending})
+                        </ToggleButton>
+                        <ToggleButton value={0} aria-label="approved">
+                            <CheckCircleIcon sx={{ mr: 0.5, fontSize: 16 }} />
+                            Approved ({statusCounts.approved})
+                        </ToggleButton>
+                        <ToggleButton value={1} aria-label="rejected">
+                            <BlockIcon sx={{ mr: 0.5, fontSize: 16 }} />
+                            Rejected ({statusCounts.rejected})
+                        </ToggleButton>
+                        <ToggleButton value={2} aria-label="cancelled">
+                            <CancelIcon sx={{ mr: 0.5, fontSize: 16 }} />
+                            Cancelled ({statusCounts.cancelled})
+                        </ToggleButton>
+                        <ToggleButton value={4} aria-label="expired">
+                            <ScheduleIcon sx={{ mr: 0.5, fontSize: 16 }} />
+                            Expired ({statusCounts.expired})
+                        </ToggleButton>
+                    </ToggleButtonGroup>
                 </Box>
             </Box>
             
@@ -104,18 +254,20 @@ export default function RequestsTable () {
                                 <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>ID</TableCell>
                                 <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Description</TableCell>
                                 <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Request Type</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Created Date</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Department</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Status</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Request Date</TableCell>
                                 <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Actions</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {requests.length !== 0 ? (
-                                requests.map((request, index) => (
+                            {filteredRequests.length !== 0 ? (
+                                filteredRequests.map((request, index) => (
                                     <RequestsTableItem key={index} request={request} />
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={5} align="center" sx={{ py: 6 }}>
+                                    <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
                                         <Box sx={{ textAlign: 'center' }}>
                                             <AssignmentIcon 
                                                 sx={{ 
@@ -126,20 +278,25 @@ export default function RequestsTable () {
                                                 }} 
                                             />
                                             <Typography variant="h6" color="text.secondary" gutterBottom>
-                                                No requests found
+                                                {statusFilter !== null ? 'No requests found with this status' : 'No requests found'}
                                             </Typography>
                                             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                                                Create your first request to get started!
+                                                {statusFilter !== null 
+                                                    ? 'Try selecting a different status filter or create a new request.'
+                                                    : 'Create your first request to get started!'
+                                                }
                                             </Typography>
-                                            <Button
-                                                component={NavLink}
-                                                to="createRequest"
-                                                variant="contained"
-                                                startIcon={<AddIcon />}
-                                                sx={{ borderRadius: 2 }}
-                                            >
-                                                Create Request
-                                            </Button>
+                                            {statusFilter === null && (
+                                                <Button
+                                                    component={NavLink}
+                                                    to="/createRequest"
+                                                    variant="contained"
+                                                    startIcon={<AddIcon />}
+                                                    sx={{ borderRadius: 2 }}
+                                                >
+                                                    Create Request
+                                                </Button>
+                                            )}
                                         </Box>
                                     </TableCell>
                                 </TableRow>
@@ -149,12 +306,12 @@ export default function RequestsTable () {
                 </TableContainer>
             </Paper>
             
-            {requests.length > 0 && (
+            {filteredRequests.length > 0 && (
                 <Fab
                     color="primary"
                     aria-label="add"
                     component={NavLink}
-                    to="createRequest"
+                    to="/createRequest"
                     sx={{
                         position: 'fixed',
                         bottom: 24,

@@ -14,7 +14,11 @@ public class CreateRequestCommandValidator : AbstractValidator<CreateRequestComm
             .WithMessage($"{nameof(Request.Description)} cannot be longer than 150 characters");
         
         RuleFor(x => x.RequestType)
-            .NotEmpty()
-            .WithMessage($"{nameof(Request.RequestType)} cannot be empty");
+            .IsInEnum()
+            .WithMessage($"{nameof(Request.RequestType)} must be a valid request type");
+
+        RuleFor(x => x.RequestDate)
+            .Must(date => !date.HasValue || date.Value.Date >= DateTime.Today.AddDays(1))
+            .WithMessage("Request Date must be at least tomorrow (cannot be today or in the past)");
     }
 }

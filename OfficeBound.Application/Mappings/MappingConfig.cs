@@ -13,5 +13,11 @@ public class MappingConfig
         
         TypeAdapterConfig<Request, GetRequestByIdResponse>.NewConfig()
             .Map(dest => dest.RequestDto, src => src);
+
+        TypeAdapterConfig<List<Department>, GetDepartmentsResponse>.NewConfig()
+            .Map(dest => dest.DepartmentsDtos, src => src);
+        
+        TypeAdapterConfig<Department, GetDepartmentByIdResponse>.NewConfig()
+            .Map(dest => dest.DepartmentDto, src => src);
     }
 }

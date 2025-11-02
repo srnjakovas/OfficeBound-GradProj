@@ -16,10 +16,9 @@ public static class DependencyInjection
         services.AddDbContext<OfficeBoundDbContext>(options =>
             options.UseSqlServer(connectionString));
 
-        // Register repositories
         services.AddScoped<IRequestRepository, RequestRepository>();
+        services.AddScoped<IDepartmentRepository, DepartmentRepository>();
         
-        // Register UnitOfWork
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
