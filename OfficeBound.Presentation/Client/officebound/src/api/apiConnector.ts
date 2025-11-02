@@ -110,9 +110,9 @@ const apiConnector = {
         return response.data.userAccountRequests;
     },
     
-    reviewAccount: async (userAccountRequestId: number, isApproved: boolean, position: string | null, departmentId: number | null): Promise<void> => {
+    reviewAccount: async (userId: number, isApproved: boolean, position: string | null, departmentId: number | null): Promise<void> => {
         await axios.post(`${API_BASE_URL}/admin/review-account`, {
-            userAccountRequestId,
+            userId,
             isApproved,
             position,
             departmentId

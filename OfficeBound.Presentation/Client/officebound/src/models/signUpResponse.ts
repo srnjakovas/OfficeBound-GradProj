@@ -1,5 +1,5 @@
 export interface SignUpResponse {
-    userAccountRequestId: number;
+    userId: number;
     message: string;
 }
 

@@ -14,8 +14,6 @@ public class OfficeBoundDbContext : DbContext
     public DbSet<Department> Departments => Set<Department>();
     
     public DbSet<User> Users => Set<User>();
-    
-    public DbSet<UserAccountRequest> UserAccountRequests => Set<UserAccountRequest>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -28,8 +28,8 @@ public class AuthController : ControllerBase
     public async Task<ActionResult<SignUpResponse>> SignUp([FromBody] SignUpRequest signUpRequest, CancellationToken cancellationToken)
     {
         var command = new SignUpCommand(signUpRequest.Username, signUpRequest.Password, signUpRequest.ConfirmPassword);
-        var userAccountRequestId = await _mediator.Send(command, cancellationToken);
-        return Ok(new SignUpResponse(userAccountRequestId, "Account request submitted successfully. Please wait for administrator approval."));
+        var userId = await _mediator.Send(command, cancellationToken);
+        return Ok(new SignUpResponse(userId, "Account request submitted successfully. Please wait for administrator approval."));
     }
 
     /// <summary>

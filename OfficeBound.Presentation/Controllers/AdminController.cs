@@ -40,7 +40,7 @@ public class AdminController : ControllerBase
     public async Task<ActionResult> ReviewAccount([FromBody] ReviewAccountRequest reviewRequest, CancellationToken cancellationToken)
     {
         var command = new ReviewAccountCommand(
-            reviewRequest.UserAccountRequestId,
+            reviewRequest.UserId,
             reviewRequest.IsApproved,
             reviewRequest.Position,
             reviewRequest.DepartmentId);

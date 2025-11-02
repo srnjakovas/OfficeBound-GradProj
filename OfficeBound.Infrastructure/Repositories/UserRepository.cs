@@ -22,5 +22,12 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             .Include(u => u.Department)
             .FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
     }
+
+    public async Task<List<User>> GetUnreviewedAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Where(u => !u.IsApproved && !u.ReviewedDate.HasValue)
+            .ToListAsync(cancellationToken);
+    }
 }
 

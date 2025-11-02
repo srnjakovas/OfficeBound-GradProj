@@ -6,9 +6,9 @@ public class ReviewAccountCommandValidator : AbstractValidator<ReviewAccountComm
 {
     public ReviewAccountCommandValidator()
     {
-        RuleFor(x => x.UserAccountRequestId)
+        RuleFor(x => x.UserId)
             .GreaterThan(0)
-            .WithMessage("User account request ID is required");
+            .WithMessage("User ID is required");
 
         When(x => x.IsApproved, () =>
         {

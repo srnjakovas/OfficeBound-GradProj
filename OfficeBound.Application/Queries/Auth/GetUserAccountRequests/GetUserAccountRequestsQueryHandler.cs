@@ -7,24 +7,24 @@ namespace OfficeBound.Application.Queries.Auth.GetUserAccountRequests;
 
 public class GetUserAccountRequestsQueryHandler : IRequestHandler<GetUserAccountRequestsQuery, GetUserAccountRequestsResponse>
 {
-    private readonly IUserAccountRequestRepository _userAccountRequestRepository;
+    private readonly IUserRepository _userRepository;
 
-    public GetUserAccountRequestsQueryHandler(IUserAccountRequestRepository userAccountRequestRepository)
+    public GetUserAccountRequestsQueryHandler(IUserRepository userRepository)
     {
-        _userAccountRequestRepository = userAccountRequestRepository;
+        _userRepository = userRepository;
     }
 
     public async Task<GetUserAccountRequestsResponse> Handle(GetUserAccountRequestsQuery request, CancellationToken cancellationToken)
     {
-        var unreviewedRequests = await _userAccountRequestRepository.GetUnreviewedAsync(cancellationToken);
+        var unreviewedUsers = await _userRepository.GetUnreviewedAsync(cancellationToken);
         
-        var requestDtos = unreviewedRequests.Select(r => new UserAccountRequestDto(
-            r.Id,
-            r.Username,
-            r.IsReviewed,
-            r.IsApproved,
-            r.CreatedDate,
-            r.ReviewedDate
+        var requestDtos = unreviewedUsers.Select(u => new UserAccountRequestDto(
+            u.Id,
+            u.Username,
+            u.ReviewedDate.HasValue,
+            u.IsApproved,
+            u.CreatedDate,
+            u.ReviewedDate
         )).ToList();
 
         return new GetUserAccountRequestsResponse(requestDtos);
