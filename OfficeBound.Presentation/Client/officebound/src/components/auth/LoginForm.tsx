@@ -1,6 +1,7 @@
 import {useNavigate} from "react-router-dom";
 import {useState} from "react";
 import apiConnector from "../../api/apiConnector.ts";
+import { useAuth } from "../../contexts/AuthContext";
 import {
     Button,
     TextField,
@@ -20,6 +21,7 @@ import {
 
 export default function LoginForm() {
     const navigate = useNavigate();
+    const { setUser } = useAuth();
 
     const [formData, setFormData] = useState({
         username: '',
@@ -67,9 +69,10 @@ export default function LoginForm() {
         // Submit to API
         apiConnector.login(formData.username, formData.password)
             .then((response) => {
-                // Store user info and token (you might want to use a context or state management)
-                localStorage.setItem('user', JSON.stringify(response.user));
+                // Store token
                 localStorage.setItem('token', response.token);
+                // Update auth context
+                setUser(response.user);
                 
                 // Redirect to home page
                 navigate('/');

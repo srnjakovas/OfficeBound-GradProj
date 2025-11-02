@@ -117,6 +117,17 @@ const apiConnector = {
             position,
             departmentId
         });
+    },
+    
+    // Request approval endpoints
+    approveRequest: async (requestId: number): Promise<void> => {
+        await axios.post(`${API_BASE_URL}/requests/${requestId}/approve`);
+    },
+    
+    rejectRequest: async (requestId: number, rejectionReason: string): Promise<void> => {
+        await axios.post(`${API_BASE_URL}/requests/${requestId}/reject`, {
+            rejectionReason
+        });
     }
 }
 

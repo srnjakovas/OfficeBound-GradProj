@@ -2,6 +2,8 @@
 import type {RequestDto} from "../../models/requestDto.ts";
 import type {DepartmentDto} from "../../models/departmentDto.ts";
 import apiConnector from "../../api/apiConnector.ts";
+import { useAuth } from "../../contexts/AuthContext";
+import { Role, canViewDepartmentRequests, canViewAllRequests } from "../../utils/roles";
 import {Button, Container, Paper, Typography, Box, Fab, Chip, useTheme, ToggleButton, ToggleButtonGroup, FormControl, InputLabel, Select, MenuItem, TextField} from "@mui/material";
 import {
     Add as AddIcon, 
@@ -36,6 +38,7 @@ export default function RequestsTable () {
     const [dateFilter, setDateFilter] = useState<string>('');
     const theme = useTheme();
     const isDark = theme.palette.mode === 'dark';
+    const { user } = useAuth();
     
     useEffect(() => {
         const fetchData = async () => {
@@ -52,6 +55,27 @@ export default function RequestsTable () {
 
     const filteredRequests = useMemo(() => {
         let filtered = requests;
+        
+        // Role-based filtering
+        if (user) {
+            if (user.role === Role.User) {
+                // Regular users see only their own requests
+                // Note: This requires backend to filter by userId - for now showing all
+                // TODO: Backend should filter requests by userId for regular users
+            } else if (canViewDepartmentRequests(user.role) && !canViewAllRequests(user.role)) {
+                // Managers and Branch Managers see only their department's requests
+                if (user.departmentId) {
+                    filtered = filtered.filter(request => request.departmentId === user.departmentId);
+                } else {
+                    // If user has no department, show no requests
+                    filtered = [];
+                }
+            }
+            // Administrators see all requests (no additional filtering)
+        } else {
+            // Not authenticated, show no requests
+            filtered = [];
+        }
         
         if (statusFilter !== null) {
             filtered = filtered.filter(request => request.requestStatus === statusFilter);
@@ -71,7 +95,7 @@ export default function RequestsTable () {
         }
         
         return filtered;
-    }, [requests, statusFilter, departmentFilter, dateFilter]);
+    }, [requests, statusFilter, departmentFilter, dateFilter, user]);
 
     const statusCounts = useMemo(() => {
         return {
