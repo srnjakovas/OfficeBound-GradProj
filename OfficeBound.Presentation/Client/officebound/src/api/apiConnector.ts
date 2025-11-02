@@ -6,6 +6,11 @@ import type {GetRequestByIdResponse} from "../models/getRequestByIdResponse.ts";
 import type {DepartmentDto} from "../models/departmentDto.ts";
 import type {GetDepartmentsResponse} from "../models/getDepartmentsResponse.ts";
 import type {GetDepartmentByIdResponse} from "../models/getDepartmentByIdResponse.ts";
+import type {UserDto} from "../models/userDto.ts";
+import type {UserAccountRequestDto} from "../models/userAccountRequestDto.ts";
+import type {LoginResponse} from "../models/loginResponse.ts";
+import type {SignUpResponse} from "../models/signUpResponse.ts";
+import type {GetUserAccountRequestsResponse} from "../models/getUserAccountRequestsResponse.ts";
 
 const apiConnector = {
     
@@ -79,6 +84,39 @@ const apiConnector = {
     
     deleteDepartment: async (departmentId: number): Promise<void> => {
         await axios.delete<number>(`${API_BASE_URL}/departments/${departmentId}`);
+    },
+    
+    // Auth endpoints
+    signUp: async (username: string, password: string, confirmPassword: string): Promise<SignUpResponse> => {
+        const response = await axios.post<SignUpResponse>(`${API_BASE_URL}/auth/signup`, {
+            username,
+            password,
+            confirmPassword
+        });
+        return response.data;
+    },
+    
+    login: async (username: string, password: string): Promise<LoginResponse> => {
+        const response = await axios.post<LoginResponse>(`${API_BASE_URL}/auth/login`, {
+            username,
+            password
+        });
+        return response.data;
+    },
+    
+    // Admin endpoints
+    getUserAccountRequests: async (): Promise<UserAccountRequestDto[]> => {
+        const response = await axios.get<GetUserAccountRequestsResponse>(`${API_BASE_URL}/admin/account-requests`);
+        return response.data.userAccountRequests;
+    },
+    
+    reviewAccount: async (userAccountRequestId: number, isApproved: boolean, position: string | null, departmentId: number | null): Promise<void> => {
+        await axios.post(`${API_BASE_URL}/admin/review-account`, {
+            userAccountRequestId,
+            isApproved,
+            position,
+            departmentId
+        });
     }
 }
 

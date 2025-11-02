@@ -17,4 +17,7 @@ public class Request : BaseEntity
     public int? DepartmentId { get; set; }
     
     public Department? Department { get; set; }
+    
+    // Many-to-many relationship with User
+    public ICollection<User> Users { get; set; } = new List<User>();
 }

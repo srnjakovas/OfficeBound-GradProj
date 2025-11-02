@@ -123,27 +123,8 @@ export default function Header({ darkMode, setDarkMode }: HeaderProps) {
         
         {/* Sign In Button */}
         <Button
-          color="inherit"
-          startIcon={<Login />}
-          sx={{
-            mr: 1,
-            textTransform: 'none',
-            fontWeight: 500,
-            px: 2,
-            py: 1,
-            borderRadius: 2,
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-            },
-            transition: 'all 0.3s ease',
-          }}
-        >
-          Sign in
-        </Button>
-        
-        {/* Log In Button */}
-        <Button
+          component={NavLink}
+          to="/login"
           color="inherit"
           startIcon={<Login />}
           sx={{
@@ -153,14 +134,16 @@ export default function Header({ darkMode, setDarkMode }: HeaderProps) {
             px: 2,
             py: 1,
             borderRadius: 2,
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backgroundColor: location.pathname === '/login' 
+              ? 'rgba(255, 255, 255, 0.2)' 
+              : 'rgba(255, 255, 255, 0.1)',
             '&:hover': {
               backgroundColor: 'rgba(255, 255, 255, 0.2)',
             },
             transition: 'all 0.3s ease',
           }}
         >
-          Log in
+          Sign In
         </Button>
         
         {/* Dark Mode Toggle */}

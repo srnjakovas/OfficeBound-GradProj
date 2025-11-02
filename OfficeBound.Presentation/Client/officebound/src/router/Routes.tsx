@@ -4,6 +4,8 @@ import RequestsForm from "../components/requests/RequestsForm.tsx";
 import RequestsTable from "../components/requests/RequestsTable.tsx";
 import DepartmentsTable from "../components/departments/DepartmentsTable.tsx";
 import DepartmentsForm from "../components/departments/DepartmentsForm.tsx";
+import LoginForm from "../components/auth/LoginForm.tsx";
+import SignUpForm from "../components/auth/SignUpForm.tsx";
 
 export const routes: RouteObject[] = [
     {
@@ -16,6 +18,8 @@ export const routes: RouteObject[] = [
             { path: 'departments', element: <DepartmentsTable /> },
             { path: 'createDepartment', element: <DepartmentsForm key='create' /> },
             { path: 'editDepartment/:id', element: <DepartmentsForm key='update' /> },
+            { path: 'login', element: <LoginForm /> },
+            { path: 'signup', element: <SignUpForm /> },
         ]
     }
 ]

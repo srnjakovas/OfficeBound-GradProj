@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OfficeBound.Application.Interfaces;
 using OfficeBound.Domain.Repositories;
 using OfficeBound.Infrastructure.Repositories;
+using OfficeBound.Infrastructure.Services;
 
 namespace OfficeBound.Infrastructure;
 
@@ -18,6 +19,9 @@ public static class DependencyInjection
 
         services.AddScoped<IRequestRepository, RequestRepository>();
         services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserAccountRequestRepository, UserAccountRequestRepository>();
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
         
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
