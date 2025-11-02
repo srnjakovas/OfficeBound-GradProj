@@ -88,7 +88,7 @@ const apiConnector = {
     
     // Auth endpoints
     signUp: async (username: string, password: string, confirmPassword: string): Promise<SignUpResponse> => {
-        const response = await axios.post<SignUpResponse>(`${API_BASE_URL}/auth/signup`, {
+        const response = await axios.post<SignUpResponse>(`${API_BASE_URL}/Auth/SignUp`, {
             username,
             password,
             confirmPassword
@@ -97,7 +97,7 @@ const apiConnector = {
     },
     
     login: async (username: string, password: string): Promise<LoginResponse> => {
-        const response = await axios.post<LoginResponse>(`${API_BASE_URL}/auth/login`, {
+        const response = await axios.post<LoginResponse>(`${API_BASE_URL}/Auth/Login`, {
             username,
             password
         });
@@ -106,16 +106,27 @@ const apiConnector = {
     
     // Admin endpoints
     getUserAccountRequests: async (): Promise<UserAccountRequestDto[]> => {
-        const response = await axios.get<GetUserAccountRequestsResponse>(`${API_BASE_URL}/admin/account-requests`);
+        const response = await axios.get<GetUserAccountRequestsResponse>(`${API_BASE_URL}/Admin/AccountRequests`);
         return response.data.userAccountRequests;
     },
     
-    reviewAccount: async (userAccountRequestId: number, isApproved: boolean, position: string | null, departmentId: number | null): Promise<void> => {
-        await axios.post(`${API_BASE_URL}/admin/review-account`, {
-            userAccountRequestId,
+    reviewAccount: async (userId: number, isApproved: boolean, position: string | null, departmentId: number | null): Promise<void> => {
+        await axios.post(`${API_BASE_URL}/Admin/ReviewAccount`, {
+            userId,
             isApproved,
             position,
             departmentId
+        });
+    },
+    
+    // Request approval endpoints
+    approveRequest: async (requestId: number): Promise<void> => {
+        await axios.post(`${API_BASE_URL}/Requests/${requestId}/Approve`);
+    },
+    
+    rejectRequest: async (requestId: number, rejectionReason: string): Promise<void> => {
+        await axios.post(`${API_BASE_URL}/Requests/${requestId}/Reject`, {
+            rejectionReason
         });
     }
 }

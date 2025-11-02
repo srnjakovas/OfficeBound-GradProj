@@ -1,7 +1,9 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using OfficeBound.Application.Commands.Requests.ApproveRequest;
 using OfficeBound.Application.Commands.Requests.CreateRequest;
 using OfficeBound.Application.Commands.Requests.DeleteRequest;
+using OfficeBound.Application.Commands.Requests.RejectRequest;
 using OfficeBound.Application.Commands.Requests.UpdateRequest;
 using OfficeBound.Application.Queries.Requests.GetRequestById;
 using OfficeBound.Application.Queries.Requests.GetRequests;
@@ -66,6 +68,28 @@ public class RequestsController : ControllerBase
     public async Task<ActionResult> DeleteRequest(int id, CancellationToken cancellationToken)
     {
         var command = new DeleteRequestCommand(id);
+        await _mediator.Send(command, cancellationToken);
+        return Ok();
+    }
+
+    [HttpPost("{id}/Approve")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> ApproveRequest(int id, CancellationToken cancellationToken)
+    {
+        var command = new ApproveRequestCommand(id);
+        await _mediator.Send(command, cancellationToken);
+        return Ok();
+    }
+
+    [HttpPost("{id}/Reject")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> RejectRequest(int id, [FromBody] RejectRequestRequest rejectRequest, CancellationToken cancellationToken)
+    {
+        var command = new RejectRequestCommand(id, rejectRequest.RejectionReason);
         await _mediator.Send(command, cancellationToken);
         return Ok();
     }

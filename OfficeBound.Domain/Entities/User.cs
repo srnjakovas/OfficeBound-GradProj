@@ -18,6 +18,8 @@ public class User : BaseEntity
     
     public bool IsApproved { get; set; } = false;
     
+    public DateTime? ReviewedDate { get; set; }
+    
     // Many-to-many relationship with Request
     public ICollection<Request> Requests { get; set; } = new List<Request>();
 }

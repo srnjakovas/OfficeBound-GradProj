@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OfficeBound.Infrastructure;
 
@@ -11,9 +12,11 @@ using OfficeBound.Infrastructure;
 namespace OfficeBound.Infrastructure.Migrations
 {
     [DbContext(typeof(OfficeBoundDbContext))]
-    partial class OfficeBoundDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251102200713_RemoveUserAccountRequestsTable")]
+    partial class RemoveUserAccountRequestsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -6,6 +6,7 @@ import {useEffect, useState} from "react";
 import {setupErrorHandlingInterceptor} from "./interceptors/axiosInterceptor.ts";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Box } from '@mui/material';
+import { AuthProvider } from './contexts/AuthContext';
 
 const lightTheme = createTheme({
   palette: {
@@ -205,16 +206,18 @@ function App() {
     }, [darkMode]);
     
   return (
-    <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
-      <CssBaseline />
-      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Header darkMode={darkMode} setDarkMode={setDarkMode} />
-        <Box component="main" sx={{ flexGrow: 1 }}>
-          <Outlet />
+    <AuthProvider>
+      <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
+        <CssBaseline />
+        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+          <Header darkMode={darkMode} setDarkMode={setDarkMode} />
+          <Box component="main" sx={{ flexGrow: 1 }}>
+            <Outlet />
+          </Box>
+          <Footer />
         </Box>
-        <Footer />
-      </Box>
-    </ThemeProvider>
+      </ThemeProvider>
+    </AuthProvider>
   )
 }
 

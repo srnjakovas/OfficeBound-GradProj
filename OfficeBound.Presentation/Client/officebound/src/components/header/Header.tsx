@@ -1,8 +1,10 @@
 ﻿import { AppBar, Toolbar, Typography, Button, Box, IconButton, Menu, MenuItem, useMediaQuery, useTheme, Avatar, Tooltip } from '@mui/material';
-import { Menu as MenuIcon, DarkMode, LightMode, Assignment, Business, Login } from '@mui/icons-material';
+import { Menu as MenuIcon, DarkMode, LightMode, Assignment, Business, Login, Logout, People, AdminPanelSettings } from '@mui/icons-material';
 import { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import Logo from '../../assets/images/office-bound-logo.jpg';
+import { useAuth } from '../../contexts/AuthContext';
+import { canManageDepartments, canApproveAccounts, getRoleName } from '../../utils/roles';
 
 interface HeaderProps {
   darkMode: boolean;
@@ -11,9 +13,12 @@ interface HeaderProps {
 
 export default function Header({ darkMode, setDarkMode }: HeaderProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -21,6 +26,20 @@ export default function Header({ darkMode, setDarkMode }: HeaderProps) {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setUserMenuAnchor(event.currentTarget);
+  };
+
+  const handleUserMenuClose = () => {
+    setUserMenuAnchor(null);
+  };
+
+  const handleLogout = () => {
+    logout();
+    handleUserMenuClose();
+    navigate('/login');
   };
 
   const toggleDarkMode = () => {
@@ -71,80 +90,157 @@ export default function Header({ darkMode, setDarkMode }: HeaderProps) {
           </Typography>
         </Box>
         
-        {/* Navigation Links */}
-        <Box sx={{ display: 'flex', gap: 1, mr: 2 }}>
-          <Button
-            component={NavLink}
-            to="/"
-            color="inherit"
-            startIcon={<Assignment />}
-            sx={{
-              textTransform: 'none',
-              fontWeight: 500,
-              px: 2,
-              py: 1,
-              borderRadius: 2,
-              backgroundColor: location.pathname === '/' || location.pathname.includes('Request') 
-                ? 'rgba(255, 255, 255, 0.2)' 
-                : 'rgba(255, 255, 255, 0.1)',
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              },
-              transition: 'all 0.3s ease',
-            }}
-          >
-            Requests
-          </Button>
-          <Button
-            component={NavLink}
-            to="/departments"
-            color="inherit"
-            startIcon={<Business />}
-            sx={{
-              textTransform: 'none',
-              fontWeight: 500,
-              px: 2,
-              py: 1,
-              borderRadius: 2,
-              backgroundColor: location.pathname.includes('Department')
-                ? 'rgba(255, 255, 255, 0.2)' 
-                : 'rgba(255, 255, 255, 0.1)',
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              },
-              transition: 'all 0.3s ease',
-            }}
-          >
-            Departments
-          </Button>
-        </Box>
+        {/* Navigation Links - only show when authenticated */}
+        {isAuthenticated && (
+          <Box sx={{ display: 'flex', gap: 1, mr: 2 }}>
+            <Button
+              component={NavLink}
+              to="/"
+              color="inherit"
+              startIcon={<Assignment />}
+              sx={{
+                textTransform: 'none',
+                fontWeight: 500,
+                px: 2,
+                py: 1,
+                borderRadius: 2,
+                backgroundColor: location.pathname === '/' || location.pathname.includes('Request') 
+                  ? 'rgba(255, 255, 255, 0.2)' 
+                  : 'rgba(255, 255, 255, 0.1)',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                },
+                transition: 'all 0.3s ease',
+              }}
+            >
+              Requests
+            </Button>
+            {user && canManageDepartments(user.role) && (
+              <Button
+                component={NavLink}
+                to="/departments"
+                color="inherit"
+                startIcon={<Business />}
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 500,
+                  px: 2,
+                  py: 1,
+                  borderRadius: 2,
+                  backgroundColor: location.pathname.includes('Department')
+                    ? 'rgba(255, 255, 255, 0.2)' 
+                    : 'rgba(255, 255, 255, 0.1)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  },
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                Departments
+              </Button>
+            )}
+            {user && canApproveAccounts(user.role) && (
+              <Button
+                component={NavLink}
+                to="/account-approvals"
+                color="inherit"
+                startIcon={<AdminPanelSettings />}
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 500,
+                  px: 2,
+                  py: 1,
+                  borderRadius: 2,
+                  backgroundColor: location.pathname.includes('account-approvals')
+                    ? 'rgba(255, 255, 255, 0.2)' 
+                    : 'rgba(255, 255, 255, 0.1)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  },
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                Account Approvals
+              </Button>
+            )}
+          </Box>
+        )}
         
         <Box sx={{ flexGrow: 1 }} />
         
-        {/* Sign In Button */}
-        <Button
-          component={NavLink}
-          to="/login"
-          color="inherit"
-          startIcon={<Login />}
-          sx={{
-            mr: 2,
-            textTransform: 'none',
-            fontWeight: 500,
-            px: 2,
-            py: 1,
-            borderRadius: 2,
-            backgroundColor: location.pathname === '/login' 
-              ? 'rgba(255, 255, 255, 0.2)' 
-              : 'rgba(255, 255, 255, 0.1)',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-            },
-            transition: 'all 0.3s ease',
-          }}
-        >
-          Sign In
-        </Button>
+        {/* User Menu or Sign In Button */}
+        {isAuthenticated && user ? (
+          <>
+            <Tooltip title={`${user.username} (${getRoleName(user.role)})`}>
+              <IconButton
+                onClick={handleUserMenuOpen}
+                sx={{
+                  mr: 2,
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  },
+                }}
+              >
+                <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
+                  {user.username.charAt(0).toUpperCase()}
+                </Avatar>
+              </IconButton>
+            </Tooltip>
+            <Menu
+              anchorEl={userMenuAnchor}
+              open={Boolean(userMenuAnchor)}
+              onClose={handleUserMenuClose}
+              PaperProps={{
+                sx: {
+                  backgroundColor: darkMode ? '#1e293b' : '#ffffff',
+                  border: `1px solid ${darkMode ? '#334155' : '#e2e8f0'}`,
+                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+                  mt: 1,
+                }
+              }}
+            >
+              <MenuItem disabled>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {user.username}
+                </Typography>
+              </MenuItem>
+              <MenuItem disabled>
+                <Typography variant="body2" color="text.secondary">
+                  {getRoleName(user.role)}
+                </Typography>
+              </MenuItem>
+              <MenuItem onClick={handleLogout}>
+                <Logout sx={{ mr: 1 }} />
+                Logout
+              </MenuItem>
+            </Menu>
+          </>
+        ) : (
+          <Button
+            component={NavLink}
+            to="/login"
+            color="inherit"
+            startIcon={<Login />}
+            sx={{
+              mr: 2,
+              textTransform: 'none',
+              fontWeight: 500,
+              px: 2,
+              py: 1,
+              borderRadius: 2,
+              backgroundColor: location.pathname === '/login' 
+                ? 'rgba(255, 255, 255, 0.2)' 
+                : 'rgba(255, 255, 255, 0.1)',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              },
+              transition: 'all 0.3s ease',
+            }}
+          >
+            Sign In
+          </Button>
+        )}
         
         {/* Dark Mode Toggle */}
         <Tooltip title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}>
@@ -205,14 +301,26 @@ export default function Header({ darkMode, setDarkMode }: HeaderProps) {
                 }
               }}
             >
-            <MenuItem component={NavLink} to="/" onClick={handleClose}>
-              <Assignment sx={{ mr: 1 }} />
-              Requests
-            </MenuItem>
-            <MenuItem component={NavLink} to="/departments" onClick={handleClose}>
-              <Business sx={{ mr: 1 }} />
-              Departments
-            </MenuItem>
+            {isAuthenticated && (
+              <>
+                <MenuItem component={NavLink} to="/" onClick={handleClose}>
+                  <Assignment sx={{ mr: 1 }} />
+                  Requests
+                </MenuItem>
+                {user && canManageDepartments(user.role) && (
+                  <MenuItem component={NavLink} to="/departments" onClick={handleClose}>
+                    <Business sx={{ mr: 1 }} />
+                    Departments
+                  </MenuItem>
+                )}
+                {user && canApproveAccounts(user.role) && (
+                  <MenuItem component={NavLink} to="/account-approvals" onClick={handleClose}>
+                    <AdminPanelSettings sx={{ mr: 1 }} />
+                    Account Approvals
+                  </MenuItem>
+                )}
+              </>
+            )}
             </Menu>
           </>
         ) : null}

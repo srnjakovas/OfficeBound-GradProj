@@ -22,20 +22,20 @@ public class AuthController : ControllerBase
     /// <summary>
     /// Sign up for a new account
     /// </summary>
-    [HttpPost("signup")]
+    [HttpPost("SignUp")]
     [ProducesResponseType(typeof(SignUpResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<SignUpResponse>> SignUp([FromBody] SignUpRequest signUpRequest, CancellationToken cancellationToken)
     {
         var command = new SignUpCommand(signUpRequest.Username, signUpRequest.Password, signUpRequest.ConfirmPassword);
-        var userAccountRequestId = await _mediator.Send(command, cancellationToken);
-        return Ok(new SignUpResponse(userAccountRequestId, "Account request submitted successfully. Please wait for administrator approval."));
+        var userId = await _mediator.Send(command, cancellationToken);
+        return Ok(new SignUpResponse(userId, "Account request submitted successfully. Please wait for administrator approval."));
     }
 
     /// <summary>
     /// Login to the system
     /// </summary>
-    [HttpPost("login")]
+    [HttpPost("Login")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

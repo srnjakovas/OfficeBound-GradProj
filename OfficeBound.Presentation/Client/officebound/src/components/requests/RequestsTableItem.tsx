@@ -1,5 +1,5 @@
 ﻿import type { RequestDto } from "../../models/requestDto";
-import { TableCell, TableRow, Box, IconButton, Tooltip, Chip, Avatar, Typography } from "@mui/material";
+import { TableCell, TableRow, Box, IconButton, Tooltip, Chip, Avatar, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from "@mui/material";
 import { 
     Edit as EditIcon, 
     Delete as DeleteIcon, 
@@ -11,20 +11,65 @@ import {
     Pending as PendingIcon,
     Cancel as CancelIcon,
     Block as BlockIcon,
-    Business as BusinessIcon
+    Business as BusinessIcon,
+    ThumbUp as ThumbUpIcon,
+    ThumbDown as ThumbDownIcon
 } from "@mui/icons-material";
 import apiConnector from "../../api/apiConnector.ts";
 import {NavLink} from "react-router-dom";
+import { useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import { canApproveRequests } from "../../utils/roles";
 
 interface Props {
     request: RequestDto;
 }
 
 export default function RequestsTableItem ({request}: Props) {
+    const { user } = useAuth();
+    const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+    const [rejectionReason, setRejectionReason] = useState('');
+    const [processing, setProcessing] = useState(false);
+
     const handleDelete = async () => {
         if (window.confirm('Are you sure you want to delete this request?')) {
             await apiConnector.deleteRequest(request.id!);
             window.location.reload();
+        }
+    };
+
+    const handleApprove = async () => {
+        if (!window.confirm('Are you sure you want to approve this request?')) {
+            return;
+        }
+        setProcessing(true);
+        try {
+            await apiConnector.approveRequest(request.id!);
+            window.location.reload();
+        } catch (error) {
+            alert('Failed to approve request');
+            setProcessing(false);
+        }
+    };
+
+    const handleRejectClick = () => {
+        setRejectDialogOpen(true);
+        setRejectionReason('');
+    };
+
+    const handleRejectConfirm = async () => {
+        if (!rejectionReason.trim()) {
+            alert('Please provide a rejection reason');
+            return;
+        }
+        setProcessing(true);
+        try {
+            await apiConnector.rejectRequest(request.id!, rejectionReason);
+            setRejectDialogOpen(false);
+            window.location.reload();
+        } catch (error) {
+            alert('Failed to reject request');
+            setProcessing(false);
         }
     };
 
@@ -141,7 +186,51 @@ export default function RequestsTableItem ({request}: Props) {
                 </Box>
             </TableCell>
             <TableCell>
-                <Box sx={{ display: 'flex', gap: 1 }}>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                    {user && canApproveRequests(user.role) && request.requestStatus === 3 && (
+                        <>
+                            <Tooltip title="Approve Request">
+                                <IconButton
+                                    onClick={handleApprove}
+                                    color="success"
+                                    size="small"
+                                    disabled={processing}
+                                    sx={{
+                                        backgroundColor: 'success.main',
+                                        color: 'white',
+                                        '&:hover': {
+                                            backgroundColor: 'success.dark',
+                                        },
+                                        '&.Mui-disabled': {
+                                            backgroundColor: 'action.disabledBackground',
+                                        },
+                                    }}
+                                >
+                                    <ThumbUpIcon fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Reject Request">
+                                <IconButton
+                                    onClick={handleRejectClick}
+                                    color="error"
+                                    size="small"
+                                    disabled={processing}
+                                    sx={{
+                                        backgroundColor: 'error.main',
+                                        color: 'white',
+                                        '&:hover': {
+                                            backgroundColor: 'error.dark',
+                                        },
+                                        '&.Mui-disabled': {
+                                            backgroundColor: 'action.disabledBackground',
+                                        },
+                                    }}
+                                >
+                                    <ThumbDownIcon fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                        </>
+                    )}
                     <Tooltip title="Edit Request">
                         <IconButton
                             component={NavLink}
@@ -177,6 +266,35 @@ export default function RequestsTableItem ({request}: Props) {
                     </Tooltip>
                 </Box>
             </TableCell>
+            
+            {/* Rejection Reason Dialog */}
+            <Dialog open={rejectDialogOpen} onClose={() => setRejectDialogOpen(false)}>
+                <DialogTitle>Reject Request</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Rejection Reason"
+                        fullWidth
+                        multiline
+                        rows={4}
+                        value={rejectionReason}
+                        onChange={(e) => setRejectionReason(e.target.value)}
+                        required
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setRejectDialogOpen(false)}>Cancel</Button>
+                    <Button 
+                        onClick={handleRejectConfirm} 
+                        color="error" 
+                        variant="contained"
+                        disabled={!rejectionReason.trim() || processing}
+                    >
+                        Reject
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </TableRow>
     )
 }
