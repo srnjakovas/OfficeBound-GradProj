@@ -30,19 +30,16 @@ builder.Services.AddApplication();
 builder.Services.AddExceptionHandler<ExceptionHandler>();
 
 var connectionString = builder.Configuration.GetConnectionString("DbConnectionString");
+var hangfireConnectionString = builder.Configuration.GetConnectionString("HangfireConnectionString");
+
+// Add Hangfire services.
 builder.Services.AddHangfire(configuration => configuration
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
     .UseSimpleAssemblyNameTypeSerializer()
     .UseRecommendedSerializerSettings()
-    .UseSqlServerStorage(connectionString, new SqlServerStorageOptions
-    {
-        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
-        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
-        QueuePollInterval = TimeSpan.Zero,
-        UseRecommendedIsolationLevel = true,
-        DisableGlobalLocks = true
-    }));
+    .UseSqlServerStorage(hangfireConnectionString));
 
+// Add the processing server as IHostedService
 builder.Services.AddHangfireServer();
 
 builder.Services.AddScoped<MarkRequestsAsExpiredJob>();
@@ -67,10 +64,11 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions
 
 app.MapControllers();
 
+// This operation must be executed out of Working hours
 RecurringJob.AddOrUpdate<MarkRequestsAsExpiredJob>(
     nameof(MarkRequestsAsExpiredJob),
     job => job.MarkRequestsAsExpiredAsync(),
-    Cron.Daily(23, 0), // 11 PM daily
+    Cron.Daily(23, 0),
     new RecurringJobOptions
     {
         TimeZone = TimeZoneInfo.Local
