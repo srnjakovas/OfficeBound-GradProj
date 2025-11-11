@@ -31,11 +31,15 @@ import {
   Business as BusinessIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+import { getRequestStatusLabel, getRequestStatusColor } from "../../utils/requestStatus";
+import { useAuth } from "../../contexts/AuthContext";
+import { Role, hasPermission } from "../../utils/roles";
 
 export default function RequestsForm () {
     const {id} = useParams();
     const navigate = useNavigate();
     const { t } = useTranslation();
+    const { user } = useAuth();
 
     const getTomorrowDate = (): string => {
         const tomorrow = new Date();
@@ -106,7 +110,7 @@ export default function RequestsForm () {
         selectedDate.setHours(0, 0, 0, 0);
         
         if (selectedDate < tomorrow) {
-            return 'Request Date must be at least tomorrow (cannot be today or in the past)';
+            return t('validation.request.date');
         }
         
         return '';
@@ -118,7 +122,7 @@ export default function RequestsForm () {
         const newErrors: Record<string, string> = {};
         
         if (!request.description.trim()) {
-            newErrors.description = 'Description is required';
+            newErrors.description = t('validation.required');
         }
         
         const dateToValidate = request.requestDate || getTomorrowDateISO();
@@ -141,7 +145,7 @@ export default function RequestsForm () {
         };
         
         if (!request.id) {
-            apiConnector.createRequest(requestToSubmit).then(() => navigate('/')).catch((error: any) => {
+            apiConnector.createRequest(requestToSubmit, user?.id).then(() => navigate('/')).catch((error: any) => {
                 const errors = error.response?.data?.errors || error.response?.data?.extensions?.errors || [];
                 
                 if (errors && Array.isArray(errors) && errors.length > 0) {
@@ -160,7 +164,7 @@ export default function RequestsForm () {
             });
         }
         else {
-            apiConnector.editRequest(requestToSubmit).then(() => navigate('/')).catch((error: any) => {
+            apiConnector.editRequest(requestToSubmit, user?.id).then(() => navigate('/')).catch((error: any) => {
                 const errors = error.response?.data?.errors || error.response?.data?.extensions?.errors || [];
                 
                 if (errors && Array.isArray(errors) && errors.length > 0) {
@@ -226,27 +230,6 @@ export default function RequestsForm () {
         }
     };
 
-    const getRequestStatusLabel = (status: number): string => {
-        const statusLabels: Record<number, string> = {
-            0: 'Approved',
-            1: 'Rejected',
-            2: 'Cancelled',
-            3: 'Pending',
-            4: 'Expired'
-        };
-        return statusLabels[status] || 'Unknown';
-    };
-
-    const getRequestStatusColor = (status: number): "success" | "error" | "warning" | "default" | "info" => {
-        const colorMap: Record<number, "success" | "error" | "warning" | "default" | "info"> = {
-            0: 'success',
-            1: 'error',
-            2: 'warning',
-            3: 'info',
-            4: 'default'
-        };
-        return colorMap[status] || 'default';
-    };
 
     return (
         <Container maxWidth="md" sx={{ py: 3 }}>
@@ -257,17 +240,14 @@ export default function RequestsForm () {
                     startIcon={<ArrowBackIcon />}
                     sx={{ mb: 2 }}
                 >
-                    Back to Requests
+                    {t('general.back')}
                 </Button>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     {id ? <EditIcon sx={{ fontSize: 32, mr: 2, color: 'primary.main' }} /> : <AddIcon sx={{ fontSize: 32, mr: 2, color: 'primary.main' }} />}
                     <Typography variant="h4" component="h1">
-                        {id ? 'Edit Request' : 'Create New Request'}
+                        {id ? t('general.edit.request') : t('general.create.request')}
                     </Typography>
                 </Box>
-                <Typography variant="body1" color="text.secondary">
-                    {id ? 'Update the request details below' : 'Fill in the details to create a new office request'}
-                </Typography>
             </Box>
 
             <Paper elevation={2} sx={{ p: 3 }}>
@@ -276,14 +256,14 @@ export default function RequestsForm () {
                         {request.id && (
                             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
                                 <Chip 
-                                    label={`Status: ${getRequestStatusLabel(request.requestStatus)}`}
+                                    label={`${t('general.status')}: ${getRequestStatusLabel(request.requestStatus, t)}`}
                                     color={getRequestStatusColor(request.requestStatus)}
                                     icon={<InfoIcon />}
                                 />
                                 {request.rejectionReason && (
                                     <Alert severity="error" sx={{ flex: 1 }}>
                                         <Typography variant="body2">
-                                            <strong>Rejection Reason:</strong> {request.rejectionReason}
+                                            <strong>{t('request.reject.reason')}:</strong> {request.rejectionReason}
                                         </Typography>
                                     </Alert>
                                 )}
@@ -292,13 +272,13 @@ export default function RequestsForm () {
 
                         <TextField
                             fullWidth
-                            label="Description"
+                            label={t('general.description')}
                             name="description"
                             multiline
                             rows={4}
                             value={request.description}
                             onChange={handleInputChange}
-                            placeholder="Describe your request..."
+                            placeholder={t('request.description.placeholder')}
                             required
                             error={!!errors.description}
                             helperText={errors.description}
@@ -313,12 +293,12 @@ export default function RequestsForm () {
                         
                         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                             <FormControl sx={{ minWidth: 200, flex: 1 }}>
-                                <InputLabel>Request Type</InputLabel>
+                                <InputLabel>{t('general.request.type')}</InputLabel>
                                 <Select
                                     name="requestType"
                                     value={request.requestType}
                                     onChange={handleSelectChange}
-                                    label="Request Type"
+                                    label={t('general.request.type')}
                                     required
                                     startAdornment={
                                         <InputAdornment position="start">
@@ -326,15 +306,19 @@ export default function RequestsForm () {
                                         </InputAdornment>
                                     }
                                 >
-                                    <MenuItem value={0}>Desk</MenuItem>
-                                    <MenuItem value={1}>Desk with Parking</MenuItem>
-                                    <MenuItem value={2}>Conference Room</MenuItem>
-                                    <MenuItem value={3}>Conference Room with Parking</MenuItem>
+                                    <MenuItem value={0}>{t('request.type.desk')}</MenuItem>
+                                    <MenuItem value={1}>{t('request.type.desk.with.parking')}</MenuItem>
+                                    {user && hasPermission(user.role, [Role.Manager, Role.BranchManager, Role.Administrator]) && (
+                                        <>
+                                            <MenuItem value={2}>{t('request.type.conference.room')}</MenuItem>
+                                            <MenuItem value={3}>{t('request.type.conference.room.with.parking')}</MenuItem>
+                                        </>
+                                    )}
                                 </Select>
                             </FormControl>
 
                             <FormControl sx={{ minWidth: 200, flex: 1 }}>
-                                <InputLabel>Department</InputLabel>
+                                <InputLabel>{t('general.department')}</InputLabel>
                                 <Select
                                     name="departmentId"
                                     value={request.departmentId || ''}
@@ -366,7 +350,7 @@ export default function RequestsForm () {
                                     min: getTomorrowDate()
                                 }}
                                 error={!!errors.requestDate}
-                                helperText={errors.requestDate || 'Select a date starting from tomorrow'}
+                                helperText={errors.requestDate || t('validation.request.date')}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
@@ -396,7 +380,7 @@ export default function RequestsForm () {
                                 type="button"
                                 startIcon={<CancelIcon />}
                             >
-                                Cancel
+                                {t('general.back')}
                             </Button>
                             <Button
                                 type="submit"
@@ -404,7 +388,7 @@ export default function RequestsForm () {
                                 size="large"
                                 startIcon={id ? <SaveIcon /> : <AddIcon />}
                             >
-                                {id ? 'Update Request' : t('general.create.request')}
+                                {id ? t('general.edit.request') : t('general.create.request')}
                             </Button>
                         </Box>
                     </Box>

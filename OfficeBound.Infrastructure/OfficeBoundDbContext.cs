@@ -31,6 +31,12 @@ public class OfficeBoundDbContext : DbContext
             .HasForeignKey(u => u.DepartmentId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        modelBuilder.Entity<Department>()
+            .HasOne(d => d.Manager)
+            .WithMany()
+            .HasForeignKey(d => d.ManagerId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         modelBuilder.Entity<Request>()
             .HasMany(r => r.Users)
             .WithMany(u => u.Requests)

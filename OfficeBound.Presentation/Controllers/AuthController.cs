@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OfficeBound.Application.Commands.Auth.Login;
 using OfficeBound.Application.Commands.Auth.SignUp;
+using OfficeBound.Application.Queries.Users.GetUsers;
 using OfficeBound.Contracts.Requests;
 using OfficeBound.Contracts.Responses;
 
@@ -37,6 +38,14 @@ public class AuthController : ControllerBase
     {
         var command = new LoginCommand(loginRequest.Username, loginRequest.Password);
         var response = await _mediator.Send(command, cancellationToken);
+        return Ok(response);
+    }
+
+    [HttpGet("Users")]
+    [ProducesResponseType(typeof(GetUsersResponse), StatusCodes.Status200OK)]
+    public async Task<ActionResult<GetUsersResponse>> GetUsers(CancellationToken cancellationToken)
+    {
+        var response = await _mediator.Send(new GetUsersQuery(), cancellationToken);
         return Ok(response);
     }
 }

@@ -5,6 +5,7 @@ using OfficeBound.Application.Commands.Requests.CreateRequest;
 using OfficeBound.Application.Commands.Requests.DeleteRequest;
 using OfficeBound.Application.Commands.Requests.RejectRequest;
 using OfficeBound.Application.Commands.Requests.UpdateRequest;
+using OfficeBound.Application.Queries.OfficeResources.GetOfficeResources;
 using OfficeBound.Application.Queries.Requests.GetRequestById;
 using OfficeBound.Application.Queries.Requests.GetRequests;
 using OfficeBound.Contracts.Requests;
@@ -46,7 +47,7 @@ public class RequestsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<int>> CreateRequest([FromBody] CreateRequest createRequest, CancellationToken cancellationToken)
     {
-        var command = new CreateRequestCommand(createRequest.Description, createRequest.RequestType, createRequest.RequestDate, createRequest.DepartmentId);
+        var command = new CreateRequestCommand(createRequest.Description, createRequest.RequestType, createRequest.RequestDate, createRequest.DepartmentId, createRequest.UserId);
         var requestId = await _mediator.Send(command, cancellationToken);
         return Ok(requestId);
     }
@@ -57,7 +58,7 @@ public class RequestsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> UpdateRequest(int id, [FromBody] UpdateRequest updateRequest, CancellationToken cancellationToken)
     {
-        var command = new UpdateRequestCommand(id, updateRequest.Description, updateRequest.RequestType, updateRequest.RequestDate, updateRequest.DepartmentId);
+        var command = new UpdateRequestCommand(id, updateRequest.Description, updateRequest.RequestType, updateRequest.RequestDate, updateRequest.DepartmentId, updateRequest.UserId);
         await _mediator.Send(command, cancellationToken);
         return Ok();
     }
@@ -92,6 +93,14 @@ public class RequestsController : ControllerBase
         var command = new RejectRequestCommand(id, rejectRequest.RejectionReason);
         await _mediator.Send(command, cancellationToken);
         return Ok();
+    }
+
+    [HttpGet("OfficeResources")]
+    [ProducesResponseType(typeof(GetOfficeResourcesResponse), StatusCodes.Status200OK)]
+    public async Task<ActionResult<GetOfficeResourcesResponse>> GetOfficeResources(CancellationToken cancellationToken)
+    {
+        var response = await _mediator.Send(new GetOfficeResourcesQuery(), cancellationToken);
+        return Ok(response);
     }
 }
 

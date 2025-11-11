@@ -4,11 +4,13 @@ import apiConnector from "../../api/apiConnector.ts";
 import {Button, Container, Paper, Typography, Box, Fab, useTheme, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Tooltip} from "@mui/material";
 import {Add as AddIcon, Business as BusinessIcon, Edit as EditIcon, Delete as DeleteIcon} from "@mui/icons-material";
 import {NavLink} from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function DepartmentsTable () {
     const [departments, setDepartments] = useState<DepartmentDto[]>([]);
     const theme = useTheme();
     const isDark = theme.palette.mode === 'dark';
+    const { t } = useTranslation();
     
     useEffect(() => {
         const fetchData = async () => {
@@ -20,7 +22,7 @@ export default function DepartmentsTable () {
     }, []);
 
     const handleDelete = async (id: number) => {
-        if (window.confirm('Are you sure you want to delete this department?')) {
+        if (window.confirm(t('general.delete.warning'))) {
             await apiConnector.deleteDepartment(id);
             window.location.reload();
         }
@@ -38,12 +40,9 @@ export default function DepartmentsTable () {
                         }} 
                     />
                     <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
-                        Departments
+                        {t('general.departments')}
                     </Typography>
                 </Box>
-                <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-                    Manage departments in your organization
-                </Typography>
                 <Button
                     component={NavLink}
                     to="/createDepartment"
@@ -51,7 +50,7 @@ export default function DepartmentsTable () {
                     startIcon={<AddIcon />}
                     sx={{ mb: 2 }}
                 >
-                    Create Department
+                    {t('department.add.new')}
                 </Button>
             </Box>
             
@@ -69,11 +68,12 @@ export default function DepartmentsTable () {
                                     : 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)',
                             }}>
                                 <TableCell sx={{ color: 'white', fontWeight: 600 }}>ID</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600 }}>Department Name</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600 }}>Manager</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600 }}>Number of People</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600 }}>Created Date</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600 }}>Actions</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('department.name')}</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('department.manager')}</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600 }}>Manager ID</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('departments.number.of.people')}</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('general.created.date')}</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('general.actions')}</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -82,7 +82,8 @@ export default function DepartmentsTable () {
                                     <TableRow key={department.id} hover>
                                         <TableCell>{department.id}</TableCell>
                                         <TableCell>{department.departmentName}</TableCell>
-                                        <TableCell>{department.manager}</TableCell>
+                                        <TableCell>{department.managerName || '-'}</TableCell>
+                                        <TableCell>{department.managerId || '-'}</TableCell>
                                         <TableCell>{department.numberOfPeople}</TableCell>
                                         <TableCell>
                                             {department.createdDate ? new Date(department.createdDate).toLocaleDateString() : '-'}
@@ -114,14 +115,11 @@ export default function DepartmentsTable () {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
+                                    <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
                                         <Box sx={{ textAlign: 'center' }}>
                                             <BusinessIcon sx={{ fontSize: 64, color: 'text.secondary', opacity: 0.5, mb: 2 }} />
                                             <Typography variant="h6" color="text.secondary" gutterBottom>
-                                                No departments found
-                                            </Typography>
-                                            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                                                Create your first department to get started!
+                                                {t('general.not.found')}
                                             </Typography>
                                             <Button
                                                 component={NavLink}
@@ -129,7 +127,7 @@ export default function DepartmentsTable () {
                                                 variant="contained"
                                                 startIcon={<AddIcon />}
                                             >
-                                                Create Department
+                                                {t('department.add.new')}
                                             </Button>
                                         </Box>
                                     </TableCell>

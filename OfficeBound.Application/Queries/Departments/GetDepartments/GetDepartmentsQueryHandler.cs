@@ -16,7 +16,7 @@ public class GetDepartmentsQueryHandler : IRequestHandler<GetDepartmentsQuery, G
     
     public async Task<GetDepartmentsResponse> Handle(GetDepartmentsQuery query, CancellationToken cancellationToken)
     {
-        var departments = await _departmentRepository.GetAllAsync(cancellationToken);
+        var departments = await _departmentRepository.GetAllWithManagerAsync(cancellationToken);
         var departmentsList = departments.ToList();
 
         return departmentsList.Adapt<GetDepartmentsResponse>();

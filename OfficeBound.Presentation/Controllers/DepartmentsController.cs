@@ -44,7 +44,7 @@ public class DepartmentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<int>> CreateDepartment([FromBody] CreateDepartment createDepartment, CancellationToken cancellationToken)
     {
-        var command = new CreateDepartmentCommand(createDepartment.DepartmentName, createDepartment.Manager, createDepartment.NumberOfPeople);
+        var command = new CreateDepartmentCommand(createDepartment.DepartmentName, createDepartment.ManagerId, createDepartment.NumberOfPeople);
         var departmentId = await _mediator.Send(command, cancellationToken);
         return Ok(departmentId);
     }
@@ -55,7 +55,7 @@ public class DepartmentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> UpdateDepartment(int id, [FromBody] UpdateDepartment updateDepartment, CancellationToken cancellationToken)
     {
-        var command = new UpdateDepartmentCommand(id, updateDepartment.DepartmentName, updateDepartment.Manager, updateDepartment.NumberOfPeople);
+        var command = new UpdateDepartmentCommand(id, updateDepartment.DepartmentName, updateDepartment.ManagerId, updateDepartment.NumberOfPeople);
         await _mediator.Send(command, cancellationToken);
         return Ok();
     }

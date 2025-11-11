@@ -2,4 +2,4 @@
 
 namespace OfficeBound.Contracts.Requests;
 
-public record CreateRequest(string Description, RequestType RequestType, DateTime? RequestDate, int? DepartmentId);
+public record CreateRequest(string Description, RequestType RequestType, DateTime? RequestDate, int? DepartmentId, int? UserId);

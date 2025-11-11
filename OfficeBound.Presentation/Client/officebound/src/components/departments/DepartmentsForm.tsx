@@ -1,5 +1,6 @@
 import {NavLink, useNavigate, useParams} from "react-router-dom";
 import type {DepartmentDto} from "../../models/departmentDto.ts";
+import type {UserDto} from "../../models/userDto.ts";
 import {useEffect, useState} from "react";
 import apiConnector from "../../api/apiConnector.ts";
 import {
@@ -10,6 +11,11 @@ import {
   Box,
   Container,
   InputAdornment,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  FormHelperText,
 } from "@mui/material";
 import { 
   ArrowBack as ArrowBackIcon,
@@ -21,20 +27,32 @@ import {
   Edit as EditIcon,
   Add as AddIcon,
 } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 export default function DepartmentsForm () {
     const {id} = useParams();
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const [department, setDepartment] = useState<DepartmentDto>({
         id: undefined,
         departmentName: '',
-        manager: '',
+        managerId: null,
+        managerName: null,
         numberOfPeople: 0,
         createdDate: undefined,
     });
 
+    const [users, setUsers] = useState<UserDto[]>([]);
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            const fetchedUsers = await apiConnector.getUsers();
+            setUsers(fetchedUsers);
+        };
+        fetchUsers();
+    }, []);
 
     useEffect(() => {
         if (id) {
@@ -53,10 +71,6 @@ export default function DepartmentsForm () {
         
         if (!department.departmentName.trim()) {
             newErrors.departmentName = 'Department Name is required';
-        }
-        
-        if (!department.manager.trim()) {
-            newErrors.manager = 'Manager is required';
         }
         
         if (department.numberOfPeople <= 0) {
@@ -129,7 +143,7 @@ export default function DepartmentsForm () {
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     {id ? <EditIcon sx={{ fontSize: 32, mr: 2, color: 'primary.main' }} /> : <AddIcon sx={{ fontSize: 32, mr: 2, color: 'primary.main' }} />}
                     <Typography variant="h4" component="h1">
-                        {id ? 'Edit Department' : 'Create New Department'}
+                        {id ? 'Edit Department' : t('departments.create.new')}
                     </Typography>
                 </Box>
                 <Typography variant="body1" color="text.secondary">
@@ -159,24 +173,24 @@ export default function DepartmentsForm () {
                             }}
                         />
                         
-                        <TextField
-                            fullWidth
-                            label="Manager"
-                            name="manager"
-                            value={department.manager}
-                            onChange={handleInputChange}
-                            placeholder="Enter manager name"
-                            required
-                            error={!!errors.manager}
-                            helperText={errors.manager}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <PersonIcon color="action" />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
+                        <FormControl fullWidth error={!!errors.managerId}>
+                            <InputLabel>Manager</InputLabel>
+                            <Select
+                                value={department.managerId || ''}
+                                onChange={(e) => setDepartment(prev => ({ ...prev, managerId: e.target.value ? Number(e.target.value) : null }))}
+                                label="Manager"
+                            >
+                                <MenuItem value="">
+                                    <em>None</em>
+                                </MenuItem>
+                                {users.map((user) => (
+                                    <MenuItem key={user.id} value={user.id}>
+                                        {user.username}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                            {errors.managerId && <FormHelperText>{errors.managerId}</FormHelperText>}
+                        </FormControl>
                         
                         <TextField
                             fullWidth

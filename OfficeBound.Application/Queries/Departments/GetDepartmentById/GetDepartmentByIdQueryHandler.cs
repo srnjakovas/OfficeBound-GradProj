@@ -18,7 +18,7 @@ public class GetDepartmentByIdQueryHandler : IRequestHandler<GetDepartmentByIdQu
     
     public async Task<GetDepartmentByIdResponse> Handle(GetDepartmentByIdQuery query, CancellationToken cancellationToken)
     {
-        var department = await _departmentRepository.GetByIdAsync(query.Id, cancellationToken);
+        var department = await _departmentRepository.GetByIdWithManagerAsync(query.Id, cancellationToken);
 
         if (department is null)
         {

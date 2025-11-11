@@ -28,12 +28,15 @@ import {
 } from '@mui/material';
 import { useTranslation } from "react-i18next";
 import { t } from "i18next";
+import { hasPermission } from "../../utils/roles";
+import type { GetOfficeResourcesResponse } from "../../models/getOfficeResourcesResponse";
 
 type StatusFilter = number | null;
 
 export default function RequestsTable () {
     const [requests, setRequests] = useState<RequestDto[]>([]);
     const [departments, setDepartments] = useState<DepartmentDto[]>([]);
+    const [officeResources, setOfficeResources] = useState<GetOfficeResourcesResponse | null>(null);
     const [statusFilter, setStatusFilter] = useState<StatusFilter>(null);
     const [departmentFilter, setDepartmentFilter] = useState<number | null>(null);
     const [dateFilter, setDateFilter] = useState<string>('');
@@ -50,10 +53,19 @@ export default function RequestsTable () {
             ]);
             setRequests(fetchedRequests);
             setDepartments(fetchedDepartments);
+            
+            if (user && hasPermission(user.role, [Role.Manager, Role.BranchManager, Role.Administrator])) {
+                try {
+                    const resources = await apiConnector.getOfficeResources();
+                    setOfficeResources(resources);
+                } catch (error) {
+                    console.error('Error fetching office resources:', error);
+                }
+            }
         }
         
         fetchData();
-    }, []);
+    }, [user]);
 
     const filteredRequests = useMemo(() => {
         let filtered = requests;
@@ -101,6 +113,44 @@ export default function RequestsTable () {
             expired: requests.filter(r => r.requestStatus === 4).length,
         };
     }, [requests]);
+
+    const availableSpaces = useMemo(() => {
+        if (!officeResources) return null;
+        
+        const targetDate = dateFilter ? new Date(dateFilter + 'T00:00:00') : (() => {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+            return tomorrow;
+        })();
+        targetDate.setHours(0, 0, 0, 0);
+        
+        const relevantRequests = requests.filter(request => {
+            if (!request.requestDate) return false;
+            const requestDate = new Date(request.requestDate);
+            requestDate.setHours(0, 0, 0, 0);
+            return requestDate.getTime() === targetDate.getTime() && 
+                   (request.requestStatus === 0 || request.requestStatus === 3); // Approved or Pending
+        });
+        
+        const deskCount = relevantRequests.filter(r => r.requestType === 0).length; // Desk
+        const deskWithParkingCount = relevantRequests.filter(r => r.requestType === 1).length; // DeskWithParking
+        const conferenceRoomCount = relevantRequests.filter(r => r.requestType === 2).length; // ConferenceRoom
+        const conferenceRoomWithParkingCount = relevantRequests.filter(r => r.requestType === 3).length; // ConferenceRoomWithParking
+        
+        const totalDesksUsed = deskCount + deskWithParkingCount;
+        const totalConferenceRoomsUsed = conferenceRoomCount + conferenceRoomWithParkingCount;
+        const totalParkingUsed = deskWithParkingCount + conferenceRoomWithParkingCount;
+        
+        return {
+            desks: Math.max(0, officeResources.numberOfDesks - totalDesksUsed),
+            conferenceRooms: Math.max(0, officeResources.numberOfConferenceRooms - totalConferenceRoomsUsed),
+            parking: Math.max(0, officeResources.numberOfParkingSpaces - totalParkingUsed),
+            totalDesks: officeResources.numberOfDesks,
+            totalConferenceRooms: officeResources.numberOfConferenceRooms,
+            totalParking: officeResources.numberOfParkingSpaces
+        };
+    }, [requests, dateFilter, officeResources]);
 
     const handleStatusFilterChange = (
         event: React.MouseEvent<HTMLElement>,
@@ -202,6 +252,28 @@ export default function RequestsTable () {
                         variant="outlined"
                         size="small"
                     />
+                    {user && hasPermission(user.role, [Role.Manager, Role.BranchManager, Role.Administrator]) && availableSpaces && (
+                        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+                            <Chip 
+                                label={`${t('request.available.desks')}: ${availableSpaces.desks}/${availableSpaces.totalDesks}`}
+                                color={availableSpaces.desks > 0 ? "success" : "error"}
+                                variant="outlined"
+                                size="small"
+                            />
+                            <Chip 
+                                label={`${t('request.available.conference.rooms')}: ${availableSpaces.conferenceRooms}/${availableSpaces.totalConferenceRooms}`}
+                                color={availableSpaces.conferenceRooms > 0 ? "success" : "error"}
+                                variant="outlined"
+                                size="small"
+                            />
+                            <Chip 
+                                label={`${t('request.available.parking')}: ${availableSpaces.parking}/${availableSpaces.totalParking}`}
+                                color={availableSpaces.parking > 0 ? "success" : "error"}
+                                variant="outlined"
+                                size="small"
+                            />
+                        </Box>
+                    )}
                     <ToggleButtonGroup
                         value={statusFilter}
                         exclusive

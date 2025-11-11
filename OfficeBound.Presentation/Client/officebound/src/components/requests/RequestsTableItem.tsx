@@ -21,6 +21,7 @@ import { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { canApproveRequests } from "../../utils/roles";
 import { useTranslation } from "react-i18next";
+import { getRequestStatusLabel, getRequestStatusColor } from "../../utils/requestStatus";
 
 interface Props {
     request: RequestDto;
@@ -83,28 +84,6 @@ export default function RequestsTableItem ({request}: Props) {
     const getRequestTypeColor = (type: number) => {
         const colors = ['default', 'primary', 'secondary', 'success'];
         return colors[type] || 'default';
-    };
-
-    const getRequestStatusLabel = (status: number): string => {
-        const statusLabels: Record<number, string> = {
-            0: t('request.status.approved'),
-            1: t('request.status.rejected'),
-            2: t('request.status.cancelled'),
-            3: t('request.status.pending'),
-            4: t('request.status.expired')
-        };
-        return statusLabels[status] || 'Unknown';
-    };
-
-    const getRequestStatusColor = (status: number): "success" | "error" | "warning" | "default" | "info" => {
-        const colorMap: Record<number, "success" | "error" | "warning" | "default" | "info"> = {
-            0: 'success',
-            1: 'error',
-            2: 'warning',
-            3: 'info',
-            4: 'default'
-        };
-        return colorMap[status] || 'default';
     };
 
     const getRequestStatusIcon = (status: number) => {
@@ -171,7 +150,7 @@ export default function RequestsTableItem ({request}: Props) {
             <TableCell>
                 <Chip 
                     icon={getRequestStatusIcon(request.requestStatus)}
-                    label={getRequestStatusLabel(request.requestStatus)}
+                    label={getRequestStatusLabel(request.requestStatus, t)}
                     color={getRequestStatusColor(request.requestStatus)}
                     size="small"
                     variant="outlined"

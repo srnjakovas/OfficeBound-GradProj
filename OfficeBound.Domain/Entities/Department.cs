@@ -4,7 +4,9 @@ public class Department : BaseEntity
 {
     public required string DepartmentName { get; set; }
     
-    public required string Manager { get; set; }
+    public int? ManagerId { get; set; }
+    
+    public User? Manager { get; set; }
     
     public int NumberOfPeople { get; set; }
     

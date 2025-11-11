@@ -12,21 +12,53 @@ namespace OfficeBound.Application.Commands.Requests.CreateRequest;
 public class CreateRequestCommandHandler : IRequestHandler<CreateRequestCommand, int>
 {
     private readonly IRequestRepository _requestRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly OfficeResourcesConfiguration _officeResources;
     
     public CreateRequestCommandHandler(
-        IRequestRepository requestRepository, 
+        IRequestRepository requestRepository,
+        IUserRepository userRepository,
         IUnitOfWork unitOfWork,
         IOptions<OfficeResourcesConfiguration> officeResources)
     {
         _requestRepository = requestRepository;
+        _userRepository = userRepository;
         _unitOfWork = unitOfWork;
         _officeResources = officeResources.Value;
     }
     
     public async Task<int> Handle(CreateRequestCommand requestCommand, CancellationToken cancellationToken)
     {
+        // Validate user can select Conference Room types
+        if (requestCommand.RequestType == RequestType.ConferenceRoom || requestCommand.RequestType == RequestType.ConferenceRoomWithParking)
+        {
+            if (!requestCommand.UserId.HasValue)
+            {
+                throw new CustomValidationException(new List<Contracts.Errors.ValidationError>
+                {
+                    new() { Property = nameof(CreateRequestCommand.RequestType), ErrorMessage = "User information is required for Conference Room requests" }
+                });
+            }
+
+            var user = await _userRepository.GetByIdAsync(requestCommand.UserId.Value, cancellationToken);
+            if (user == null)
+            {
+                throw new CustomValidationException(new List<Contracts.Errors.ValidationError>
+                {
+                    new() { Property = nameof(CreateRequestCommand.RequestType), ErrorMessage = "User not found" }
+                });
+            }
+
+            if (user.Role != Role.Manager && user.Role != Role.BranchManager && user.Role != Role.Administrator)
+            {
+                throw new CustomValidationException(new List<Contracts.Errors.ValidationError>
+                {
+                    new() { Property = nameof(CreateRequestCommand.RequestType), ErrorMessage = "Only Managers, Branch Managers, and Administrators can request Conference Rooms" }
+                });
+            }
+        }
+
         var defaultRequestDate = DateTime.Today.AddDays(1).ToUniversalTime();
         var requestDate = requestCommand.RequestDate?.ToUniversalTime() ?? defaultRequestDate;
         
