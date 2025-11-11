@@ -6,7 +6,6 @@ import type {GetRequestByIdResponse} from "../models/getRequestByIdResponse.ts";
 import type {DepartmentDto} from "../models/departmentDto.ts";
 import type {GetDepartmentsResponse} from "../models/getDepartmentsResponse.ts";
 import type {GetDepartmentByIdResponse} from "../models/getDepartmentByIdResponse.ts";
-import type {UserDto} from "../models/userDto.ts";
 import type {UserAccountRequestDto} from "../models/userAccountRequestDto.ts";
 import type {LoginResponse} from "../models/loginResponse.ts";
 import type {SignUpResponse} from "../models/signUpResponse.ts";
@@ -86,7 +85,6 @@ const apiConnector = {
         await axios.delete<number>(`${API_BASE_URL}/departments/${departmentId}`);
     },
     
-    // Auth endpoints
     signUp: async (username: string, password: string, confirmPassword: string): Promise<SignUpResponse> => {
         const response = await axios.post<SignUpResponse>(`${API_BASE_URL}/Auth/SignUp`, {
             username,
@@ -104,7 +102,6 @@ const apiConnector = {
         return response.data;
     },
     
-    // Admin endpoints
     getUserAccountRequests: async (): Promise<UserAccountRequestDto[]> => {
         const response = await axios.get<GetUserAccountRequestsResponse>(`${API_BASE_URL}/Admin/AccountRequests`);
         return response.data.userAccountRequests;
@@ -119,7 +116,6 @@ const apiConnector = {
         });
     },
     
-    // Request approval endpoints
     approveRequest: async (requestId: number): Promise<void> => {
         await axios.post(`${API_BASE_URL}/Requests/${requestId}/Approve`);
     },

@@ -24,7 +24,6 @@ public class SignUpCommandHandler : IRequestHandler<SignUpCommand, int>
 
     public async Task<int> Handle(SignUpCommand request, CancellationToken cancellationToken)
     {
-        // Check if username already exists (approved or pending)
         var existingUser = await _userRepository.GetByUsernameAsync(request.Username, cancellationToken);
         if (existingUser != null)
         {
@@ -34,7 +33,6 @@ public class SignUpCommandHandler : IRequestHandler<SignUpCommand, int>
             });
         }
 
-        // Create new user with pending approval
         var user = new User
         {
             Username = request.Username,

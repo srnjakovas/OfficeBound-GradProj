@@ -36,6 +36,7 @@ import type { UserAccountRequestDto } from '../../models/userAccountRequestDto';
 import type { DepartmentDto } from '../../models/departmentDto';
 import { useAuth } from '../../contexts/AuthContext';
 import { Role } from '../../utils/roles';
+import { useTranslation } from 'react-i18next';
 
 export default function AccountApproval() {
     const [accountRequests, setAccountRequests] = useState<UserAccountRequestDto[]>([]);
@@ -50,6 +51,7 @@ export default function AccountApproval() {
     const theme = useTheme();
     const isDark = theme.palette.mode === 'dark';
     const { user } = useAuth();
+    const { t } = useTranslation();
 
     useEffect(() => {
         fetchData();
@@ -62,12 +64,8 @@ export default function AccountApproval() {
                 apiConnector.getDepartments()
             ]);
             
-            // Filter by department if Branch Manager (not Administrator)
             let filteredRequests = requests;
             if (user && user.role === Role.BranchManager && user.departmentId) {
-                // Branch Managers only see requests for their department
-                // Note: This assumes we need to filter on the backend or add department info to the request
-                // For now, we'll show all and let backend handle it later
                 filteredRequests = requests;
             }
             
@@ -306,7 +304,7 @@ export default function AccountApproval() {
                             <Select
                                 value={departmentId || ''}
                                 onChange={(e) => setDepartmentId(Number(e.target.value))}
-                                label="Department"
+                                label={t('general.department')}
                             >
                                 {departments.map((dept) => (
                                     <MenuItem key={dept.id} value={dept.id}>

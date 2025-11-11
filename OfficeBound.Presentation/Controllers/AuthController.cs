@@ -19,9 +19,6 @@ public class AuthController : ControllerBase
         _mediator = mediator;
     }
 
-    /// <summary>
-    /// Sign up for a new account
-    /// </summary>
     [HttpPost("SignUp")]
     [ProducesResponseType(typeof(SignUpResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -32,9 +29,6 @@ public class AuthController : ControllerBase
         return Ok(new SignUpResponse(userId, "Account request submitted successfully. Please wait for administrator approval."));
     }
 
-    /// <summary>
-    /// Login to the system
-    /// </summary>
     [HttpPost("Login")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

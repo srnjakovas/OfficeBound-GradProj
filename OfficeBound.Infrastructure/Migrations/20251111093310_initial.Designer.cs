@@ -12,8 +12,8 @@ using OfficeBound.Infrastructure;
 namespace OfficeBound.Infrastructure.Migrations
 {
     [DbContext(typeof(OfficeBoundDbContext))]
-    [Migration("20251102200713_RemoveUserAccountRequestsTable")]
-    partial class RemoveUserAccountRequestsTable
+    [Migration("20251111093310_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

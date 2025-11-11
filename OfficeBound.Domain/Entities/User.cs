@@ -4,9 +4,9 @@ namespace OfficeBound.Domain.Entities;
 
 public class User : BaseEntity
 {
-    public string Username { get; set; }
+    public required string Username { get; set; }
     
-    public string Password { get; set; } // Should be hashed
+    public required string Password { get; set; }
     
     public Role Role { get; set; } = Role.User;
     
@@ -20,7 +20,6 @@ public class User : BaseEntity
     
     public DateTime? ReviewedDate { get; set; }
     
-    // Many-to-many relationship with Request
     public ICollection<Request> Requests { get; set; } = new List<Request>();
 }
 
