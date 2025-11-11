@@ -26,7 +26,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
 
         if (user == null || !_passwordHasher.VerifyPassword(request.Password, user.Password))
         {
-            throw new CustomValidationException(new List<OfficeBound.Contracts.Errors.ValidationError>
+            throw new CustomValidationException(new List<Contracts.Errors.ValidationError>
             {
                 new() { Property = "Login", ErrorMessage = "Invalid username or password" }
             });
@@ -51,7 +51,6 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
             user.CreatedDate
         );
 
-        // For now, we'll return a simple token. In production, use JWT tokens
         var token = $"token_{user.Id}_{Guid.NewGuid()}";
 
         return new LoginResponse(userDto, token);

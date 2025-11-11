@@ -35,7 +35,6 @@ export default function SignUpForm() {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
-        // Clear error when user starts typing
         if (errors[name]) {
             setErrors((prev) => {
                 const newErrors = { ...prev };
@@ -51,7 +50,6 @@ export default function SignUpForm() {
         setErrors({});
         setSuccessMessage('');
 
-        // Client-side validation
         const newErrors: Record<string, string> = {};
         
         if (!formData.username.trim()) {
@@ -78,23 +76,19 @@ export default function SignUpForm() {
             return;
         }
 
-        // Submit to API
         apiConnector.signUp(formData.username, formData.password, formData.confirmPassword)
             .then((response) => {
                 setSuccessMessage(response.message);
-                // Clear form after successful submission
                 setFormData({
                     username: '',
                     password: '',
                     confirmPassword: '',
                 });
-                // Optionally redirect after a delay
                 setTimeout(() => {
                     navigate('/login');
                 }, 3000);
             })
             .catch((error: any) => {
-                // Handle validation errors from backend
                 const errors = error.response?.data?.errors || error.response?.data?.extensions?.errors || [];
                 
                 if (errors && Array.isArray(errors) && errors.length > 0) {

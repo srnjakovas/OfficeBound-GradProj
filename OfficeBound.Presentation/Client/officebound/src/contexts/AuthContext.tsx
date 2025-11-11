@@ -17,7 +17,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
 
     useEffect(() => {
-        // Sync with localStorage
         if (user) {
             localStorage.setItem('user', JSON.stringify(user));
         } else {

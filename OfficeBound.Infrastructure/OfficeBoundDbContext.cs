@@ -19,21 +19,18 @@ public class OfficeBoundDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Request - Department relationship (one-to-many)
         modelBuilder.Entity<Request>()
             .HasOne(r => r.Department)
             .WithMany()
             .HasForeignKey(r => r.DepartmentId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        // User - Department relationship (many-to-one)
         modelBuilder.Entity<User>()
             .HasOne(u => u.Department)
             .WithMany(d => d.Users)
             .HasForeignKey(u => u.DepartmentId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        // Request - User relationship (many-to-many)
         modelBuilder.Entity<Request>()
             .HasMany(r => r.Users)
             .WithMany(u => u.Requests)

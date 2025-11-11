@@ -4,7 +4,7 @@ namespace OfficeBound.Domain.Entities;
 
 public class Request : BaseEntity
 {
-    public string Description { get; set; }
+    public required string Description { get; set; }
 
     public string? RejectionReason { get; set; }
     
@@ -17,7 +17,6 @@ public class Request : BaseEntity
     public int? DepartmentId { get; set; }
     
     public Department? Department { get; set; }
-    
-    // Many-to-many relationship with User
+
     public ICollection<User> Users { get; set; } = new List<User>();
 }

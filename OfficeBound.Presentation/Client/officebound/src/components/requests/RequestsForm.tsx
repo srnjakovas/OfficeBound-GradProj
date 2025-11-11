@@ -47,19 +47,15 @@ export default function RequestsForm () {
     const getTomorrowDateISO = (): string => {
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
-        // Set to local midnight, then convert to ISO
         tomorrow.setHours(0, 0, 0, 0);
-        // Create ISO string from local date components to avoid timezone shift
         const year = tomorrow.getFullYear();
         const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
         const day = String(tomorrow.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}T00:00:00.000Z`;
     };
 
-    // Convert ISO string to YYYY-MM-DD format without timezone conversion
     const isoToDateString = (isoString: string | undefined): string => {
         if (!isoString) return getTomorrowDate();
-        // Extract YYYY-MM-DD directly from ISO string to avoid timezone issues
         const match = isoString.match(/^(\d{4}-\d{2}-\d{2})/);
         return match ? match[1] : getTomorrowDate();
     };

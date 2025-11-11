@@ -6,27 +6,50 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OfficeBound.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddUserTable : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "UserAccountRequests",
+                name: "Departments",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsReviewed = table.Column<bool>(type: "bit", nullable: false),
-                    IsApproved = table.Column<bool>(type: "bit", nullable: false),
-                    ReviewedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DepartmentName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Manager = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NumberOfPeople = table.Column<int>(type: "int", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserAccountRequests", x => x.Id);
+                    table.PrimaryKey("PK_Departments", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Requests",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RejectionReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RequestType = table.Column<int>(type: "int", nullable: false),
+                    RequestDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    RequestStatus = table.Column<int>(type: "int", nullable: false),
+                    DepartmentId = table.Column<int>(type: "int", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Requests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Requests_Departments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "Departments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -41,6 +64,7 @@ namespace OfficeBound.Infrastructure.Migrations
                     Position = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DepartmentId = table.Column<int>(type: "int", nullable: true),
                     IsApproved = table.Column<bool>(type: "bit", nullable: false),
+                    ReviewedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -79,6 +103,11 @@ namespace OfficeBound.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Requests_DepartmentId",
+                table: "Requests",
+                column: "DepartmentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RequestUsers_UserId",
                 table: "RequestUsers",
                 column: "UserId");
@@ -96,10 +125,13 @@ namespace OfficeBound.Infrastructure.Migrations
                 name: "RequestUsers");
 
             migrationBuilder.DropTable(
-                name: "UserAccountRequests");
+                name: "Requests");
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Departments");
         }
     }
 }

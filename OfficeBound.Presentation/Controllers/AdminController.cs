@@ -19,9 +19,6 @@ public class AdminController : ControllerBase
         _mediator = mediator;
     }
 
-    /// <summary>
-    /// Get all unreviewed user account requests
-    /// </summary>
     [HttpGet("AccountRequests")]
     [ProducesResponseType(typeof(GetUserAccountRequestsResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<GetUserAccountRequestsResponse>> GetUserAccountRequests(CancellationToken cancellationToken)
@@ -30,9 +27,6 @@ public class AdminController : ControllerBase
         return Ok(response);
     }
 
-    /// <summary>
-    /// Review and approve/reject a user account request
-    /// </summary>
     [HttpPost("ReviewAccount")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -62,12 +62,8 @@ export default function AccountApproval() {
                 apiConnector.getDepartments()
             ]);
             
-            // Filter by department if Branch Manager (not Administrator)
             let filteredRequests = requests;
             if (user && user.role === Role.BranchManager && user.departmentId) {
-                // Branch Managers only see requests for their department
-                // Note: This assumes we need to filter on the backend or add department info to the request
-                // For now, we'll show all and let backend handle it later
                 filteredRequests = requests;
             }
             

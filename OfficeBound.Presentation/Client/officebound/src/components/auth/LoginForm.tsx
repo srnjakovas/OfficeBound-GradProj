@@ -34,7 +34,6 @@ export default function LoginForm() {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
-        // Clear error when user starts typing
         if (errors[name]) {
             setErrors((prev) => {
                 const newErrors = { ...prev };
@@ -49,7 +48,6 @@ export default function LoginForm() {
         setIsSubmitting(true);
         setErrors({});
 
-        // Client-side validation
         const newErrors: Record<string, string> = {};
         
         if (!formData.username.trim()) {
@@ -66,19 +64,14 @@ export default function LoginForm() {
             return;
         }
 
-        // Submit to API
         apiConnector.login(formData.username, formData.password)
             .then((response) => {
-                // Store token
                 localStorage.setItem('token', response.token);
-                // Update auth context
                 setUser(response.user);
                 
-                // Redirect to home page
                 navigate('/');
             })
             .catch((error: any) => {
-                // Handle validation errors from backend
                 const errors = error.response?.data?.errors || error.response?.data?.extensions?.errors || [];
                 
                 if (errors && Array.isArray(errors) && errors.length > 0) {

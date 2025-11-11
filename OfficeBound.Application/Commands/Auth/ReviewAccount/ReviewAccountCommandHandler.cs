@@ -35,7 +35,6 @@ public class ReviewAccountCommandHandler : IRequestHandler<ReviewAccountCommand>
             });
         }
 
-        // Update user with review information
         user.IsApproved = request.IsApproved;
         user.ReviewedDate = DateTime.UtcNow;
 

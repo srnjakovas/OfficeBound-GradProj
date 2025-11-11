@@ -14,7 +14,6 @@ import {
     Cancel as CancelIcon,
     Block as BlockIcon,
     Schedule as ScheduleIcon,
-    Business as BusinessIcon,
     FilterAlt as FilterAltIcon
 } from "@mui/icons-material";
 import RequestsTableItem from "./RequestsTableItem.tsx";
@@ -56,24 +55,16 @@ export default function RequestsTable () {
     const filteredRequests = useMemo(() => {
         let filtered = requests;
         
-        // Role-based filtering
         if (user) {
             if (user.role === Role.User) {
-                // Regular users see only their own requests
-                // Note: This requires backend to filter by userId - for now showing all
-                // TODO: Backend should filter requests by userId for regular users
             } else if (canViewDepartmentRequests(user.role) && !canViewAllRequests(user.role)) {
-                // Managers and Branch Managers see only their department's requests
                 if (user.departmentId) {
                     filtered = filtered.filter(request => request.departmentId === user.departmentId);
                 } else {
-                    // If user has no department, show no requests
                     filtered = [];
                 }
             }
-            // Administrators see all requests (no additional filtering)
         } else {
-            // Not authenticated, show no requests
             filtered = [];
         }
         

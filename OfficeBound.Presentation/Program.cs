@@ -32,14 +32,12 @@ builder.Services.AddExceptionHandler<ExceptionHandler>();
 var connectionString = builder.Configuration.GetConnectionString("DbConnectionString");
 var hangfireConnectionString = builder.Configuration.GetConnectionString("HangfireConnectionString");
 
-// Add Hangfire services.
 builder.Services.AddHangfire(configuration => configuration
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
     .UseSimpleAssemblyNameTypeSerializer()
     .UseRecommendedSerializerSettings()
     .UseSqlServerStorage(hangfireConnectionString));
 
-// Add the processing server as IHostedService
 builder.Services.AddHangfireServer();
 
 builder.Services.AddScoped<MarkRequestsAsExpiredJob>();

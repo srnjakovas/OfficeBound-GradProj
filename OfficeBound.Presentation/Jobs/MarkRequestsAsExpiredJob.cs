@@ -24,8 +24,6 @@ public class MarkRequestsAsExpiredJob
     {
         try
         {
-            _logger.LogInformation("Starting mark requests as expired job at {Time}", DateTime.UtcNow);
-
             var today = DateTime.Today;
             var allRequests = await _requestRepository.GetAllAsync();
 
@@ -35,7 +33,6 @@ public class MarkRequestsAsExpiredJob
 
             if (!requestsToMarkAsExpired.Any())
             {
-                _logger.LogInformation("No requests found to mark as expired");
                 return;
             }
 
@@ -46,8 +43,6 @@ public class MarkRequestsAsExpiredJob
             }
 
             await _unitOfWork.SaveChangesAsync();
-
-            _logger.LogInformation("Successfully marked {Count} request(s) as expired", requestsToMarkAsExpired.Count);
         }
         catch (Exception ex)
         {
