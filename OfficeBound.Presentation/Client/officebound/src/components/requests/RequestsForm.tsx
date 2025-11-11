@@ -30,10 +30,12 @@ import {
   Info as InfoIcon,
   Business as BusinessIcon,
 } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 export default function RequestsForm () {
     const {id} = useParams();
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const getTomorrowDate = (): string => {
         const tomorrow = new Date();
@@ -271,7 +273,6 @@ export default function RequestsForm () {
             <Paper elevation={2} sx={{ p: 3 }}>
                 <Box component="form" onSubmit={handleSubmit} noValidate>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                        {/* Read-only status and rejection reason when editing */}
                         {request.id && (
                             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
                                 <Chip 
@@ -338,7 +339,7 @@ export default function RequestsForm () {
                                     name="departmentId"
                                     value={request.departmentId || ''}
                                     onChange={handleSelectChange}
-                                    label="Department"
+                                    label={t('general.department')}
                                     startAdornment={
                                         <InputAdornment position="start">
                                             <BusinessIcon color="action" />
@@ -356,7 +357,7 @@ export default function RequestsForm () {
 
                             <TextField
                                 fullWidth
-                                label="Request Date"
+                                label={t('general.request.date')}
                                 name="requestDate"
                                 type="date"
                                 value={isoToDateString(request.requestDate)}
@@ -403,7 +404,7 @@ export default function RequestsForm () {
                                 size="large"
                                 startIcon={id ? <SaveIcon /> : <AddIcon />}
                             >
-                                {id ? 'Update Request' : 'Create Request'}
+                                {id ? 'Update Request' : t('general.create.request')}
                             </Button>
                         </Box>
                     </Box>

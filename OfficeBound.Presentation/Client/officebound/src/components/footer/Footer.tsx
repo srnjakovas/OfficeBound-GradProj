@@ -10,10 +10,12 @@ import {
   ContactMail as ContactIcon,
   Policy as PolicyIcon,
 } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 export default function Footer() {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
+  const { t } = useTranslation();
 
   return (
     <Box
@@ -52,75 +54,13 @@ export default function Footer() {
               OfficeBound
             </Typography>
             <Typography variant="body2" sx={{ mb: 2, opacity: 0.9 }}>
-              Streamline your office requests and improve workplace efficiency with our modern, intuitive platform.
+              {t('footer.description')}
             </Typography>
           </Box>
           
           <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-              Quick Links
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Link 
-                href="#" 
-                color="inherit" 
-                sx={{ 
-                  mb: 1,
-                  opacity: 0.8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  '&:hover': {
-                    opacity: 1,
-                    textDecoration: 'underline',
-                  },
-                  transition: 'opacity 0.3s ease',
-                }}
-              >
-                <InfoIcon sx={{ mr: 1, fontSize: 16 }} />
-                Features
-              </Link>
-              <Link 
-                href="#" 
-                color="inherit" 
-                sx={{ 
-                  mb: 1,
-                  opacity: 0.8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  '&:hover': {
-                    opacity: 1,
-                    textDecoration: 'underline',
-                  },
-                  transition: 'opacity 0.3s ease',
-                }}
-              >
-                <StarIcon sx={{ mr: 1, fontSize: 16 }} />
-                Testimonials
-              </Link>
-              <Link 
-                href="#" 
-                color="inherit" 
-                sx={{ 
-                  mb: 1,
-                  opacity: 0.8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  '&:hover': {
-                    opacity: 1,
-                    textDecoration: 'underline',
-                  },
-                  transition: 'opacity 0.3s ease',
-                }}
-              >
-                <LoginIcon sx={{ mr: 1, fontSize: 16 }} />
-                Sign In
-              </Link>
-            </Box>
-          </Box>
-          
-          <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-              Support
+              {t('footer.support')}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Link 
@@ -139,7 +79,7 @@ export default function Footer() {
                 }}
               >
                 <HelpIcon sx={{ mr: 1, fontSize: 16 }} />
-                Help Center
+                {t('footer.help.center')}
               </Link>
               <Link 
                 href="#" 
@@ -157,32 +97,14 @@ export default function Footer() {
                 }}
               >
                 <ContactIcon sx={{ mr: 1, fontSize: 16 }} />
-                Contact Us
-              </Link>
-              <Link 
-                href="#" 
-                color="inherit" 
-                sx={{ 
-                  mb: 1,
-                  opacity: 0.8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  '&:hover': {
-                    opacity: 1,
-                    textDecoration: 'underline',
-                  },
-                  transition: 'opacity 0.3s ease',
-                }}
-              >
-                <PolicyIcon sx={{ mr: 1, fontSize: 16 }} />
-                Privacy Policy
+                {t('footer.contact')}
               </Link>
             </Box>
           </Box>
           
           <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-              Connect
+              {t('general.follow')}
             </Typography>
             <Box sx={{ display: 'flex', gap: 2 }}>
               <Link 

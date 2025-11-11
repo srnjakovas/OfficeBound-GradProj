@@ -1,6 +1,7 @@
 using Hangfire;
 using Hangfire.SqlServer;
 using OfficeBound.Application;
+using OfficeBound.Application.Configuration;
 using OfficeBound.Infrastructure;
 using OfficeBound.Presentation;
 using OfficeBound.Presentation.Handlers;
@@ -28,6 +29,9 @@ builder.Services.AddCors(opt =>
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 builder.Services.AddExceptionHandler<ExceptionHandler>();
+
+builder.Services.Configure<OfficeResourcesConfiguration>(
+    builder.Configuration.GetSection("OfficeResources"));
 
 var connectionString = builder.Configuration.GetConnectionString("DbConnectionString");
 var hangfireConnectionString = builder.Configuration.GetConnectionString("HangfireConnectionString");

@@ -18,10 +18,12 @@ import {
     Login as LoginIcon,
     PersonAdd as PersonAddIcon,
 } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 export default function LoginForm() {
     const navigate = useNavigate();
     const { setUser } = useAuth();
+    const { t } = useTranslation();
 
     const [formData, setFormData] = useState({
         username: '',
@@ -51,11 +53,11 @@ export default function LoginForm() {
         const newErrors: Record<string, string> = {};
         
         if (!formData.username.trim()) {
-            newErrors.username = 'Username is required';
+            newErrors.username = t('validation.username.required');
         }
 
         if (!formData.password) {
-            newErrors.password = 'Password is required';
+            newErrors.password = t('validation.password.required');
         }
 
         if (Object.keys(newErrors).length > 0) {
@@ -85,7 +87,7 @@ export default function LoginForm() {
                     });
                     setErrors(backendErrors);
                 } else {
-                    setErrors({ submit: error.response?.data?.detail || 'Invalid username or password' });
+                    setErrors({ submit: error.response?.data?.detail || t('validation.username.or.password.missmatch') });
                 }
             })
             .finally(() => {
@@ -97,10 +99,10 @@ export default function LoginForm() {
         <Container maxWidth="sm" sx={{ py: 5 }}>
             <Box sx={{ mb: 3, textAlign: 'center' }}>
                 <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 1 }}>
-                    Sign In
+                    {t('general.sign.in')}
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
-                    Enter your credentials to access your account
+                    {t('auth.login.description')}
                 </Typography>
             </Box>
 
@@ -119,11 +121,11 @@ export default function LoginForm() {
 
                         <TextField
                             fullWidth
-                            label="Username"
+                            label={t('general.username')}
                             name="username"
                             value={formData.username}
                             onChange={handleInputChange}
-                            placeholder="Enter your username"
+                            placeholder={t('general.username.description')}
                             required
                             error={!!errors.username}
                             helperText={errors.username}
@@ -139,12 +141,12 @@ export default function LoginForm() {
 
                         <TextField
                             fullWidth
-                            label="Password"
+                            label={t('general.password')}
                             name="password"
                             type="password"
                             value={formData.password}
                             onChange={handleInputChange}
-                            placeholder="Enter your password"
+                            placeholder={t('general.password.description')}
                             required
                             error={!!errors.password}
                             helperText={errors.password}
@@ -167,7 +169,7 @@ export default function LoginForm() {
                                 startIcon={<PersonAddIcon />}
                                 disabled={isSubmitting}
                             >
-                                Create Account
+                                {t('general.sign.up')}
                             </Button>
                             <Button
                                 type="submit"
@@ -176,7 +178,7 @@ export default function LoginForm() {
                                 startIcon={<LoginIcon />}
                                 disabled={isSubmitting}
                             >
-                                {isSubmitting ? 'Signing In...' : 'Sign In'}
+                                {isSubmitting ? t('general.loading') : t('general.sign.in')}
                             </Button>
                         </Box>
                     </Box>

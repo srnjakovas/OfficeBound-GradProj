@@ -36,6 +36,7 @@ import type { UserAccountRequestDto } from '../../models/userAccountRequestDto';
 import type { DepartmentDto } from '../../models/departmentDto';
 import { useAuth } from '../../contexts/AuthContext';
 import { Role } from '../../utils/roles';
+import { useTranslation } from 'react-i18next';
 
 export default function AccountApproval() {
     const [accountRequests, setAccountRequests] = useState<UserAccountRequestDto[]>([]);
@@ -50,6 +51,7 @@ export default function AccountApproval() {
     const theme = useTheme();
     const isDark = theme.palette.mode === 'dark';
     const { user } = useAuth();
+    const { t } = useTranslation();
 
     useEffect(() => {
         fetchData();
@@ -302,7 +304,7 @@ export default function AccountApproval() {
                             <Select
                                 value={departmentId || ''}
                                 onChange={(e) => setDepartmentId(Number(e.target.value))}
-                                label="Department"
+                                label={t('general.department')}
                             >
                                 {departments.map((dept) => (
                                     <MenuItem key={dept.id} value={dept.id}>

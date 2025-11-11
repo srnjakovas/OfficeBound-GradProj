@@ -20,6 +20,7 @@ import {NavLink} from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { canApproveRequests } from "../../utils/roles";
+import { useTranslation } from "react-i18next";
 
 interface Props {
     request: RequestDto;
@@ -30,6 +31,7 @@ export default function RequestsTableItem ({request}: Props) {
     const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
     const [processing, setProcessing] = useState(false);
+    const { t } = useTranslation();
 
     const handleDelete = async () => {
         if (window.confirm('Are you sure you want to delete this request?')) {
@@ -85,11 +87,11 @@ export default function RequestsTableItem ({request}: Props) {
 
     const getRequestStatusLabel = (status: number): string => {
         const statusLabels: Record<number, string> = {
-            0: 'Approved',
-            1: 'Rejected',
-            2: 'Cancelled',
-            3: 'Pending',
-            4: 'Expired'
+            0: t('request.status.approved'),
+            1: t('request.status.rejected'),
+            2: t('request.status.cancelled'),
+            3: t('request.status.pending'),
+            4: t('request.status.expired')
         };
         return statusLabels[status] || 'Unknown';
     };
@@ -267,7 +269,6 @@ export default function RequestsTableItem ({request}: Props) {
                 </Box>
             </TableCell>
             
-            {/* Rejection Reason Dialog */}
             <Dialog open={rejectDialogOpen} onClose={() => setRejectDialogOpen(false)}>
                 <DialogTitle>Reject Request</DialogTitle>
                 <DialogContent>

@@ -18,9 +18,11 @@ import {
     Add as AddIcon,
     CheckCircle as CheckCircleIcon,
 } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 export default function SignUpForm() {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const [formData, setFormData] = useState({
         username: '',
@@ -53,19 +55,19 @@ export default function SignUpForm() {
         const newErrors: Record<string, string> = {};
         
         if (!formData.username.trim()) {
-            newErrors.username = 'Username is required';
-        } else if (formData.username.length < 3) {
-            newErrors.username = 'Username must be at least 3 characters';
+            newErrors.username = t('validation.username.required');
+        } else if (formData.username.length < 6) {
+            newErrors.username = t('validation.minlengh');
         }
 
         if (!formData.password) {
-            newErrors.password = 'Password is required';
+            newErrors.password = t('validation.password.required');
         } else if (formData.password.length < 6) {
-            newErrors.password = 'Password must be at least 6 characters';
+            newErrors.password = t('validation.minlengh');
         }
 
         if (!formData.confirmPassword) {
-            newErrors.confirmPassword = 'Please confirm your password';
+            newErrors.confirmPassword = t('validation.confirm.password.required');
         } else if (formData.password !== formData.confirmPassword) {
             newErrors.confirmPassword = 'Passwords do not match';
         }
@@ -114,10 +116,10 @@ export default function SignUpForm() {
         <Container maxWidth="sm" sx={{ py: 5 }}>
             <Box sx={{ mb: 3, textAlign: 'center' }}>
                 <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 1 }}>
-                    Create Account
+                    {t('auth.create.account')}
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
-                    Sign up for a new account. Your request will be reviewed by an administrator.
+                    {t('auth.create.account.description')}
                 </Typography>
             </Box>
 
@@ -146,11 +148,11 @@ export default function SignUpForm() {
 
                         <TextField
                             fullWidth
-                            label="Username"
+                            label={t('general.username')}
                             name="username"
                             value={formData.username}
                             onChange={handleInputChange}
-                            placeholder="Enter your username"
+                            placeholder={t('general.username.description')}
                             required
                             error={!!errors.username}
                             helperText={errors.username}
@@ -165,15 +167,15 @@ export default function SignUpForm() {
 
                         <TextField
                             fullWidth
-                            label="Password"
+                            label={t('general.password')}
                             name="password"
                             type="password"
                             value={formData.password}
                             onChange={handleInputChange}
-                            placeholder="Enter your password"
+                            placeholder={t('general.password.description')}
                             required
                             error={!!errors.password}
-                            helperText={errors.password || 'Minimum 6 characters'}
+                            helperText={errors.password}
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
@@ -185,12 +187,12 @@ export default function SignUpForm() {
 
                         <TextField
                             fullWidth
-                            label="Confirm Password"
+                            label={t('general.confirm.password')}
                             name="confirmPassword"
                             type="password"
                             value={formData.confirmPassword}
                             onChange={handleInputChange}
-                            placeholder="Confirm your password"
+                            placeholder={t('general.confirm.password.description')}
                             required
                             error={!!errors.confirmPassword}
                             helperText={errors.confirmPassword}
@@ -211,7 +213,7 @@ export default function SignUpForm() {
                                 type="button"
                                 disabled={isSubmitting}
                             >
-                                Back to Login
+                                {t('general.back.to.login')}
                             </Button>
                             <Button
                                 type="submit"
@@ -220,7 +222,7 @@ export default function SignUpForm() {
                                 startIcon={<AddIcon />}
                                 disabled={isSubmitting}
                             >
-                                {isSubmitting ? 'Signing Up...' : 'Sign Up'}
+                                {isSubmitting ? t('general.loading') : t('general.sign.up')}
                             </Button>
                         </Box>
                     </Box>

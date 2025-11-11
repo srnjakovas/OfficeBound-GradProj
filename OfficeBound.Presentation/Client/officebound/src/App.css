@@ -1,7 +1,5 @@
-/* Import Inter font from Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* Modern Material-UI styling */
 body {
     margin: 0;
     font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif;
@@ -11,17 +9,14 @@ body {
     min-height: 100vh;
 }
 
-/* Dark mode body background */
 body.dark {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
 }
 
-/* Smooth transitions for better UX */
 * {
     transition: all 0.2s ease-in-out;
 }
 
-/* Custom scrollbar for webkit browsers */
 ::-webkit-scrollbar {
     width: 8px;
 }
@@ -52,13 +47,11 @@ body.dark {
     background: #64748b;
 }
 
-/* Enhanced focus styles */
 *:focus-visible {
     outline: 2px solid #3b82f6;
     outline-offset: 2px;
 }
 
-/* Improved button hover effects */
 .MuiButton-root {
     position: relative;
     overflow: hidden;

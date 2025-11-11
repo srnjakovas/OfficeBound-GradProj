@@ -1,10 +1,11 @@
 ﻿import { AppBar, Toolbar, Typography, Button, Box, IconButton, Menu, MenuItem, useMediaQuery, useTheme, Avatar, Tooltip } from '@mui/material';
-import { Menu as MenuIcon, DarkMode, LightMode, Assignment, Business, Login, Logout, People, AdminPanelSettings } from '@mui/icons-material';
+import { Menu as MenuIcon, DarkMode, LightMode, Assignment, Business, Login, Logout, AdminPanelSettings } from '@mui/icons-material';
 import { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import Logo from '../../assets/images/office-bound-logo.jpg';
 import { useAuth } from '../../contexts/AuthContext';
 import { canManageDepartments, canApproveAccounts, getRoleName } from '../../utils/roles';
+import { useTranslation } from 'react-i18next';
 
 interface HeaderProps {
   darkMode: boolean;
@@ -19,6 +20,7 @@ export default function Header({ darkMode, setDarkMode }: HeaderProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
+  const { t } = useTranslation();
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -90,7 +92,6 @@ export default function Header({ darkMode, setDarkMode }: HeaderProps) {
           </Typography>
         </Box>
         
-        {/* Navigation Links - only show when authenticated */}
         {isAuthenticated && (
           <Box sx={{ display: 'flex', gap: 1, mr: 2 }}>
             <Button
@@ -113,7 +114,7 @@ export default function Header({ darkMode, setDarkMode }: HeaderProps) {
                 transition: 'all 0.3s ease',
               }}
             >
-              Requests
+              {t('general.requests')}
             </Button>
             {user && canManageDepartments(user.role) && (
               <Button
@@ -136,7 +137,7 @@ export default function Header({ darkMode, setDarkMode }: HeaderProps) {
                   transition: 'all 0.3s ease',
                 }}
               >
-                Departments
+                {t('general.departments')}
               </Button>
             )}
             {user && canApproveAccounts(user.role) && (
@@ -160,7 +161,7 @@ export default function Header({ darkMode, setDarkMode }: HeaderProps) {
                   transition: 'all 0.3s ease',
                 }}
               >
-                Account Approvals
+                {t('general.account.approvals')}
               </Button>
             )}
           </Box>
@@ -168,7 +169,6 @@ export default function Header({ darkMode, setDarkMode }: HeaderProps) {
         
         <Box sx={{ flexGrow: 1 }} />
         
-        {/* User Menu or Sign In Button */}
         {isAuthenticated && user ? (
           <>
             <Tooltip title={`${user.username} (${getRoleName(user.role)})`}>
@@ -212,7 +212,7 @@ export default function Header({ darkMode, setDarkMode }: HeaderProps) {
               </MenuItem>
               <MenuItem onClick={handleLogout}>
                 <Logout sx={{ mr: 1 }} />
-                Logout
+                {t('general.logout')}
               </MenuItem>
             </Menu>
           </>
@@ -238,11 +238,10 @@ export default function Header({ darkMode, setDarkMode }: HeaderProps) {
               transition: 'all 0.3s ease',
             }}
           >
-            Sign In
+            {t('general.sign.in')}
           </Button>
         )}
         
-        {/* Dark Mode Toggle */}
         <Tooltip title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}>
           <IconButton
             onClick={toggleDarkMode}
@@ -305,18 +304,18 @@ export default function Header({ darkMode, setDarkMode }: HeaderProps) {
               <>
                 <MenuItem component={NavLink} to="/" onClick={handleClose}>
                   <Assignment sx={{ mr: 1 }} />
-                  Requests
+                  {t('general.requests')}
                 </MenuItem>
                 {user && canManageDepartments(user.role) && (
                   <MenuItem component={NavLink} to="/departments" onClick={handleClose}>
                     <Business sx={{ mr: 1 }} />
-                    Departments
+                    {t('general.departments')}
                   </MenuItem>
                 )}
                 {user && canApproveAccounts(user.role) && (
                   <MenuItem component={NavLink} to="/account-approvals" onClick={handleClose}>
                     <AdminPanelSettings sx={{ mr: 1 }} />
-                    Account Approvals
+                    {t('general.accountApprovals')}
                   </MenuItem>
                 )}
               </>

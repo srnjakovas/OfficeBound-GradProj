@@ -26,6 +26,8 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
+import { useTranslation } from "react-i18next";
+import { t } from "i18next";
 
 type StatusFilter = number | null;
 
@@ -38,6 +40,7 @@ export default function RequestsTable () {
     const theme = useTheme();
     const isDark = theme.palette.mode === 'dark';
     const { user } = useAuth();
+    const { t } = useTranslation();
     
     useEffect(() => {
         const fetchData = async () => {
@@ -136,26 +139,25 @@ export default function RequestsTable () {
                             WebkitTextFillColor: 'transparent',
                         }}
                     >
-                        Office Requests
+                        {t('general.requests')}
                     </Typography>
                 </Box>
                 <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-                    Manage and track all office requests in one place
+                    {t('general.application.description')}
                 </Typography>
                 
-                {/* Filters Section */}
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', mb: 2, p: 2, bgcolor: isDark ? 'rgba(51, 65, 85, 0.5)' : 'rgba(241, 245, 249, 0.8)', borderRadius: 2 }}>
                     <FilterAltIcon sx={{ color: 'text.secondary' }} />
                     <Typography variant="subtitle2" color="text.secondary" sx={{ mr: 1 }}>
-                        Filters:
+                        {t('general.filters')}:
                     </Typography>
                     
                     <FormControl sx={{ minWidth: 180 }} size="small">
-                        <InputLabel>Department</InputLabel>
+                        <InputLabel>{t('general.department')}</InputLabel>
                         <Select
                             value={departmentFilter || ''}
-                            onChange={(e) => setDepartmentFilter(e.target.value === '' ? null : Number(e.target.value))}
-                            label="Department"
+                            onChange={(e) => setDepartmentFilter(e.target.value === null ? null : Number(e.target.value))}
+                            label={t('general.department')}
                         >
                             <MenuItem value="">All Departments</MenuItem>
                             {departments.map((dept) => (
@@ -167,7 +169,7 @@ export default function RequestsTable () {
                     </FormControl>
                     
                     <TextField
-                        label="Filter by Date"
+                        label={t('general.date')}
                         type="date"
                         value={dateFilter}
                         onChange={(e) => setDateFilter(e.target.value)}
@@ -195,7 +197,7 @@ export default function RequestsTable () {
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', mb: 2 }}>
                     <Chip 
                         icon={<TrendingUpIcon />}
-                        label={`${filteredRequests.length} ${departmentFilter !== null || dateFilter ? 'Filtered' : 'Total'} Requests`} 
+                        label={`${filteredRequests.length} ${t('general.total')} `} 
                         color="primary" 
                         variant="outlined"
                         size="small"
@@ -220,28 +222,28 @@ export default function RequestsTable () {
                             },
                         }}
                     >
-                        <ToggleButton value={null} aria-label="all">
-                            All ({statusCounts.all})
+                        <ToggleButton value='' aria-label="all">
+                            {t('general.all')} ({statusCounts.all})
                         </ToggleButton>
                         <ToggleButton value={3} aria-label="pending">
                             <PendingIcon sx={{ mr: 0.5, fontSize: 16 }} />
-                            Pending ({statusCounts.pending})
+                            {t('request.status.pending')}  ({statusCounts.pending})
                         </ToggleButton>
                         <ToggleButton value={0} aria-label="approved">
                             <CheckCircleIcon sx={{ mr: 0.5, fontSize: 16 }} />
-                            Approved ({statusCounts.approved})
+                            {t('request.status.approved')}  ({statusCounts.approved})
                         </ToggleButton>
                         <ToggleButton value={1} aria-label="rejected">
                             <BlockIcon sx={{ mr: 0.5, fontSize: 16 }} />
-                            Rejected ({statusCounts.rejected})
+                            {t('request.status.rejected')}  ({statusCounts.rejected})
                         </ToggleButton>
                         <ToggleButton value={2} aria-label="cancelled">
                             <CancelIcon sx={{ mr: 0.5, fontSize: 16 }} />
-                            Cancelled ({statusCounts.cancelled})
+                            {t('request.status.cancelled')}  ({statusCounts.cancelled})
                         </ToggleButton>
                         <ToggleButton value={4} aria-label="expired">
                             <ScheduleIcon sx={{ mr: 0.5, fontSize: 16 }} />
-                            Expired ({statusCounts.expired})
+                            {t('request.status.expired')} ({statusCounts.expired})
                         </ToggleButton>
                     </ToggleButtonGroup>
                 </Box>
@@ -267,12 +269,12 @@ export default function RequestsTable () {
                                     : 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)',
                             }}>
                                 <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>ID</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Description</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Request Type</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Department</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Status</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Request Date</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Actions</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>{t('general.description')}</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>{t('general.request.type')}</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>{t('general.department')}</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>{t('general.status')}</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>{t('general.request.date')}</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>{t('general.actions')}</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -293,13 +295,7 @@ export default function RequestsTable () {
                                                 }} 
                                             />
                                             <Typography variant="h6" color="text.secondary" gutterBottom>
-                                                {statusFilter !== null ? 'No requests found with this status' : 'No requests found'}
-                                            </Typography>
-                                            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                                                {statusFilter !== null 
-                                                    ? 'Try selecting a different status filter or create a new request.'
-                                                    : 'Create your first request to get started!'
-                                                }
+                                                {t('general.not.found')}
                                             </Typography>
                                             {statusFilter === null && (
                                                 <Button
@@ -309,7 +305,7 @@ export default function RequestsTable () {
                                                     startIcon={<AddIcon />}
                                                     sx={{ borderRadius: 2 }}
                                                 >
-                                                    Create Request
+                                                    {t('general.create.request')}
                                                 </Button>
                                             )}
                                         </Box>
