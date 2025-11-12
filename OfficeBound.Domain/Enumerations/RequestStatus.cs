@@ -6,5 +6,6 @@ public enum RequestStatus
     Rejected,
     Cancelled,
     Pending,
-    Expired
+    Expired,
+    CancelledByUser
 }

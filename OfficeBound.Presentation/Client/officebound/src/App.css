@@ -34,7 +34,6 @@ body.dark {
     background: #a8a8a8;
 }
 
-/* Dark mode scrollbar */
 .dark ::-webkit-scrollbar-track {
     background: #1e293b;
 }

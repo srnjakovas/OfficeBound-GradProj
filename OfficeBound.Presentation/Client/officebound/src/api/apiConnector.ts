@@ -10,6 +10,9 @@ import type {UserAccountRequestDto} from "../models/userAccountRequestDto.ts";
 import type {LoginResponse} from "../models/loginResponse.ts";
 import type {SignUpResponse} from "../models/signUpResponse.ts";
 import type {GetUserAccountRequestsResponse} from "../models/getUserAccountRequestsResponse.ts";
+import type {UserDto} from "../models/userDto.ts";
+import type {GetUsersResponse} from "../models/getUsersResponse.ts";
+import type {GetOfficeResourcesResponse} from "../models/getOfficeResourcesResponse.ts";
 
 const apiConnector = {
     
@@ -23,22 +26,24 @@ const apiConnector = {
             }));
     },
     
-    createRequest: async (request: RequestDto): Promise<void> => {
+    createRequest: async (request: RequestDto, userId?: number): Promise<void> => {
         const payload = {
             description: request.description,
             requestType: request.requestType,
             requestDate: request.requestDate ? new Date(request.requestDate).toISOString() : null,
-            departmentId: request.departmentId || null
+            departmentId: request.departmentId || null,
+            userId: userId || null
         };
         await axios.post<number>(`${API_BASE_URL}/requests`, payload);
     },
     
-    editRequest: async (request: RequestDto): Promise<void> => {
+    editRequest: async (request: RequestDto, userId?: number): Promise<void> => {
         const payload = {
             description: request.description,
             requestType: request.requestType,
             requestDate: request.requestDate ? new Date(request.requestDate).toISOString() : null,
-            departmentId: request.departmentId || null
+            departmentId: request.departmentId || null,
+            userId: userId || null
         };
         await axios.put<number>(`${API_BASE_URL}/requests/${request.id}`, payload);
     },
@@ -66,19 +71,25 @@ const apiConnector = {
     createDepartment: async (department: DepartmentDto): Promise<void> => {
         const payload = {
             departmentName: department.departmentName,
-            manager: department.manager,
+            managerId: department.managerId || null,
             numberOfPeople: department.numberOfPeople
         };
         await axios.post<number>(`${API_BASE_URL}/departments`, payload);
     },
     
-    editDepartment: async (department: DepartmentDto): Promise<void> => {
+    editDepartment: async (department: DepartmentDto, userId?: number): Promise<void> => {
         const payload = {
             departmentName: department.departmentName,
-            manager: department.manager,
-            numberOfPeople: department.numberOfPeople
+            managerId: department.managerId || null,
+            numberOfPeople: department.numberOfPeople,
+            userId: userId || null
         };
         await axios.put<number>(`${API_BASE_URL}/departments/${department.id}`, payload);
+    },
+    
+    getUsers: async (): Promise<UserDto[]> => {
+        const response = await axios.get<GetUsersResponse>(`${API_BASE_URL}/Auth/Users`);
+        return response.data.usersDtos;
     },
     
     deleteDepartment: async (departmentId: number): Promise<void> => {
@@ -107,12 +118,13 @@ const apiConnector = {
         return response.data.userAccountRequests;
     },
     
-    reviewAccount: async (userId: number, isApproved: boolean, position: string | null, departmentId: number | null): Promise<void> => {
+    reviewAccount: async (userId: number, isApproved: boolean, position: string | null, departmentId: number | null, setAsBranchManager: boolean = false): Promise<void> => {
         await axios.post(`${API_BASE_URL}/Admin/ReviewAccount`, {
             userId,
             isApproved,
             position,
-            departmentId
+            departmentId,
+            setAsBranchManager
         });
     },
     
@@ -124,6 +136,29 @@ const apiConnector = {
         await axios.post(`${API_BASE_URL}/Requests/${requestId}/Reject`, {
             rejectionReason
         });
+    },
+
+    cancelRequest: async (requestId: number, cancellationReason: string, userId?: number): Promise<void> => {
+        await axios.post(`${API_BASE_URL}/Requests/${requestId}/Cancel`, {
+            cancellationReason,
+            userId: userId || null
+        });
+    },
+    
+    getOfficeResources: async (): Promise<GetOfficeResourcesResponse> => {
+        const response = await axios.get<GetOfficeResourcesResponse>(`${API_BASE_URL}/Requests/OfficeResources`);
+        return response.data;
+    },
+
+    deleteUser: async (userId: number, rejectionReason: string): Promise<void> => {
+        await axios.delete(`${API_BASE_URL}/Admin/Users/${userId}`, {
+            data: { rejectionReason }
+        });
+    },
+
+    hasBranchManager: async (): Promise<boolean> => {
+        const response = await axios.get<boolean>(`${API_BASE_URL}/Admin/HasBranchManager`);
+        return response.data;
     }
 }
 

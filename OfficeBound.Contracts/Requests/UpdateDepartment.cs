@@ -1,4 +1,4 @@
 namespace OfficeBound.Contracts.Requests;
 
-public record UpdateDepartment(string DepartmentName, string Manager, int NumberOfPeople);
+public record UpdateDepartment(string DepartmentName, int? ManagerId, int NumberOfPeople, int? UserId);
 

@@ -2,8 +2,8 @@
 
 public enum RequestType
 {
-    Desk,
-    DeskWithParking,
     ConferenceRoom,
     ConferenceRoomWithParking,
+    Desk,
+    DeskWithParking,
 }

@@ -1,5 +1,6 @@
 import {NavLink, useNavigate, useParams} from "react-router-dom";
 import type {DepartmentDto} from "../../models/departmentDto.ts";
+import type {UserDto} from "../../models/userDto.ts";
 import {useEffect, useState} from "react";
 import apiConnector from "../../api/apiConnector.ts";
 import {
@@ -10,31 +11,53 @@ import {
   Box,
   Container,
   InputAdornment,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  FormHelperText,
 } from "@mui/material";
 import { 
   ArrowBack as ArrowBackIcon,
   Business as BusinessIcon,
-  Person as PersonIcon,
   Group as GroupIcon,
   Save as SaveIcon,
   Cancel as CancelIcon,
   Edit as EditIcon,
   Add as AddIcon,
 } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
+import { useAuth } from "../../contexts/AuthContext";
+import { Role } from "../../utils/roles";
 
 export default function DepartmentsForm () {
     const {id} = useParams();
     const navigate = useNavigate();
+    const { t } = useTranslation();
+    const { user } = useAuth();
+    const isAdministrator = user?.role === Role.Administrator;
+    const isEditMode = !!id;
+    const canEditDepartmentName = isAdministrator || !isEditMode;
 
     const [department, setDepartment] = useState<DepartmentDto>({
         id: undefined,
         departmentName: '',
-        manager: '',
+        managerId: null,
+        managerName: null,
         numberOfPeople: 0,
         createdDate: undefined,
     });
 
+    const [users, setUsers] = useState<UserDto[]>([]);
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            const fetchedUsers = await apiConnector.getUsers();
+            setUsers(fetchedUsers);
+        };
+        fetchUsers();
+    }, []);
 
     useEffect(() => {
         if (id) {
@@ -53,10 +76,6 @@ export default function DepartmentsForm () {
         
         if (!department.departmentName.trim()) {
             newErrors.departmentName = 'Department Name is required';
-        }
-        
-        if (!department.manager.trim()) {
-            newErrors.manager = 'Manager is required';
         }
         
         if (department.numberOfPeople <= 0) {
@@ -90,7 +109,7 @@ export default function DepartmentsForm () {
             });
         }
         else {
-            apiConnector.editDepartment(department).then(() => navigate('/departments')).catch((error: any) => {
+            apiConnector.editDepartment(department, user?.id).then(() => navigate('/departments')).catch((error: any) => {
                 const errors = error.response?.data?.errors || error.response?.data?.extensions?.errors || [];
                 
                 if (errors && Array.isArray(errors) && errors.length > 0) {
@@ -124,17 +143,14 @@ export default function DepartmentsForm () {
                     startIcon={<ArrowBackIcon />}
                     sx={{ mb: 2 }}
                 >
-                    Back to Departments
+                    {t('general.back')}
                 </Button>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     {id ? <EditIcon sx={{ fontSize: 32, mr: 2, color: 'primary.main' }} /> : <AddIcon sx={{ fontSize: 32, mr: 2, color: 'primary.main' }} />}
                     <Typography variant="h4" component="h1">
-                        {id ? 'Edit Department' : 'Create New Department'}
+                        {id ? t('departments.update') : t('departments.create.new')}
                     </Typography>
                 </Box>
-                <Typography variant="body1" color="text.secondary">
-                    {id ? 'Update the department details below' : 'Fill in the details to create a new department'}
-                </Typography>
             </Box>
 
             <Paper elevation={2} sx={{ p: 3 }}>
@@ -142,14 +158,15 @@ export default function DepartmentsForm () {
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                         <TextField
                             fullWidth
-                            label="Department Name"
+                            label={t('department.name')}
                             name="departmentName"
                             value={department.departmentName}
                             onChange={handleInputChange}
-                            placeholder="Enter department name"
+                            placeholder={t('departments.name.placeholder')}
                             required
+                            disabled={!canEditDepartmentName}
                             error={!!errors.departmentName}
-                            helperText={errors.departmentName}
+                            helperText={errors.departmentName || (!canEditDepartmentName && isEditMode ? t('department.name.edit.restriction') : '')}
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
@@ -159,33 +176,33 @@ export default function DepartmentsForm () {
                             }}
                         />
                         
-                        <TextField
-                            fullWidth
-                            label="Manager"
-                            name="manager"
-                            value={department.manager}
-                            onChange={handleInputChange}
-                            placeholder="Enter manager name"
-                            required
-                            error={!!errors.manager}
-                            helperText={errors.manager}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <PersonIcon color="action" />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
+                        <FormControl fullWidth error={!!errors.managerId}>
+                            <InputLabel>{t('department.manager')}</InputLabel>
+                            <Select
+                                value={department.managerId || ''}
+                                onChange={(e) => setDepartment(prev => ({ ...prev, managerId: e.target.value ? Number(e.target.value) : null }))}
+                                label={t('department.manager')}
+                            >
+                                <MenuItem value="">
+                                    <em>None</em>
+                                </MenuItem>
+                                {users.map((user) => (
+                                    <MenuItem key={user.id} value={user.id}>
+                                        {user.username}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                            {errors.managerId && <FormHelperText>{errors.managerId}</FormHelperText>}
+                        </FormControl>
                         
                         <TextField
                             fullWidth
-                            label="Number of People"
+                            label={t('departments.number.of.people')}
                             name="numberOfPeople"
                             type="number"
                             value={department.numberOfPeople}
                             onChange={handleInputChange}
-                            placeholder="Enter number of people"
+                            placeholder={t('departments.number.of.people')}
                             required
                             error={!!errors.numberOfPeople}
                             helperText={errors.numberOfPeople}
@@ -203,7 +220,7 @@ export default function DepartmentsForm () {
 
                         {department.createdDate && (
                             <Typography variant="body2" color="text.secondary">
-                                Created: {new Date(department.createdDate).toLocaleString()}
+                                {t('department.created.date')} {new Date(department.createdDate).toLocaleString()}
                             </Typography>
                         )}
                         
@@ -216,7 +233,7 @@ export default function DepartmentsForm () {
                                 type="button"
                                 startIcon={<CancelIcon />}
                             >
-                                Cancel
+                                {t('general.back')}
                             </Button>
                             <Button
                                 type="submit"
@@ -224,7 +241,7 @@ export default function DepartmentsForm () {
                                 size="large"
                                 startIcon={id ? <SaveIcon /> : <AddIcon />}
                             >
-                                {id ? 'Update Department' : 'Create Department'}
+                                {id ? t('departments.update') : t('department.add.new')}
                             </Button>
                         </Box>
                     </Box>

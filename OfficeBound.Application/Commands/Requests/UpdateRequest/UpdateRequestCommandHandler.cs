@@ -12,15 +12,18 @@ namespace OfficeBound.Application.Commands.Requests.UpdateRequest;
 public class UpdateRequestCommandHandler : IRequestHandler<UpdateRequestCommand, Unit>
 {
     private readonly IRequestRepository _requestRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly OfficeResourcesConfiguration _officeResources;
 
     public UpdateRequestCommandHandler(
-        IRequestRepository requestRepository, 
+        IRequestRepository requestRepository,
+        IUserRepository userRepository,
         IUnitOfWork unitOfWork,
         IOptions<OfficeResourcesConfiguration> officeResources)
     {
         _requestRepository = requestRepository;
+        _userRepository = userRepository;
         _unitOfWork = unitOfWork;
         _officeResources = officeResources.Value;
     }
@@ -32,6 +35,47 @@ public class UpdateRequestCommandHandler : IRequestHandler<UpdateRequestCommand,
         if (requestToUpdate is null)
         {
             throw new NotFoundException($"{nameof(Request)} with Id: {request.Id} was not found in Database");
+        }
+
+        if (!request.UserId.HasValue)
+        {
+            throw new CustomValidationException(new List<Contracts.Errors.ValidationError>
+            {
+                new() { Property = nameof(UpdateRequestCommand.RequestType), ErrorMessage = "User information is required" }
+            });
+        }
+
+        var user = await _userRepository.GetByIdAsync(request.UserId.Value, cancellationToken);
+        if (user == null)
+        {
+            throw new CustomValidationException(new List<Contracts.Errors.ValidationError>
+            {
+                new() { Property = nameof(UpdateRequestCommand.RequestType), ErrorMessage = "User not found" }
+            });
+        }
+
+        // Branch Managers cannot request Desk or DeskWithParking (they have their own office)
+        if (request.RequestType == RequestType.Desk || request.RequestType == RequestType.DeskWithParking)
+        {
+            if (user.Role == Role.BranchManager)
+            {
+                throw new CustomValidationException(new List<Contracts.Errors.ValidationError>
+                {
+                    new() { Property = nameof(UpdateRequestCommand.RequestType), ErrorMessage = "Branch Managers cannot request desks as they have their own office" }
+                });
+            }
+        }
+
+        // Only Managers, Branch Managers, and Administrators can request Conference Room types
+        if (request.RequestType == RequestType.ConferenceRoom || request.RequestType == RequestType.ConferenceRoomWithParking)
+        {
+            if (user.Role != Role.Manager && user.Role != Role.BranchManager && user.Role != Role.Administrator)
+            {
+                throw new CustomValidationException(new List<Contracts.Errors.ValidationError>
+                {
+                    new() { Property = nameof(UpdateRequestCommand.RequestType), ErrorMessage = "Only Managers, Branch Managers, and Administrators can request Conference Rooms" }
+                });
+            }
         }
 
         var requestDate = request.RequestDate?.ToUniversalTime() ?? requestToUpdate.RequestDate;

@@ -1,4 +1,4 @@
 namespace OfficeBound.Contracts.Requests;
 
-public record CreateDepartment(string DepartmentName, string Manager, int NumberOfPeople);
+public record CreateDepartment(string DepartmentName, int? ManagerId, int NumberOfPeople);
 

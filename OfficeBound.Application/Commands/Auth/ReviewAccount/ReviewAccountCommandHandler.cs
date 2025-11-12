@@ -1,6 +1,7 @@
 using MediatR;
 using OfficeBound.Application.Interfaces;
 using OfficeBound.Contracts.Exceptions;
+using OfficeBound.Domain.Enumerations;
 using OfficeBound.Domain.Repositories;
 
 namespace OfficeBound.Application.Commands.Auth.ReviewAccount;
@@ -42,6 +43,11 @@ public class ReviewAccountCommandHandler : IRequestHandler<ReviewAccountCommand>
         {
             user.Position = request.Position;
             user.DepartmentId = request.DepartmentId;
+            
+            if (request.SetAsBranchManager)
+            {
+                user.Role = Role.BranchManager;
+            }
         }
 
         await _userRepository.UpdateAsync(user, cancellationToken);

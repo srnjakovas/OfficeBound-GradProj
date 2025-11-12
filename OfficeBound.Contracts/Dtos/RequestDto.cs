@@ -11,4 +11,5 @@ public record RequestDto(
     RequestStatus RequestStatus, 
     string? RejectionReason,
     int? DepartmentId,
-    string? DepartmentName);
+    string? DepartmentName,
+    string? CreatedByUsername);

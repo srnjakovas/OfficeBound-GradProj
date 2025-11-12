@@ -1,6 +1,7 @@
 ﻿import {createBrowserRouter, type RouteObject} from "react-router-dom";
 import App from "../App.tsx";
 import RequestsForm from "../components/requests/RequestsForm.tsx";
+import RequestsPreview from "../components/requests/RequestsPreview.tsx";
 import RequestsTable from "../components/requests/RequestsTable.tsx";
 import DepartmentsTable from "../components/departments/DepartmentsTable.tsx";
 import DepartmentsForm from "../components/departments/DepartmentsForm.tsx";
@@ -40,9 +41,17 @@ export const routes: RouteObject[] = [
                 ) 
             },
             { 
+                path: 'previewRequest/:id', 
+                element: (
+                    <ProtectedRoute>
+                        <RequestsPreview />
+                    </ProtectedRoute>
+                ) 
+            },
+            { 
                 path: 'departments', 
                 element: (
-                    <ProtectedRoute requiredRoles={[Role.Administrator]}>
+                    <ProtectedRoute requiredRoles={[Role.BranchManager, Role.Administrator]}>
                         <DepartmentsTable />
                     </ProtectedRoute>
                 ) 
@@ -50,7 +59,7 @@ export const routes: RouteObject[] = [
             { 
                 path: 'createDepartment', 
                 element: (
-                    <ProtectedRoute requiredRoles={[Role.Administrator]}>
+                    <ProtectedRoute requiredRoles={[Role.BranchManager, Role.Administrator]}>
                         <DepartmentsForm key='create' />
                     </ProtectedRoute>
                 ) 
@@ -58,7 +67,7 @@ export const routes: RouteObject[] = [
             { 
                 path: 'editDepartment/:id', 
                 element: (
-                    <ProtectedRoute requiredRoles={[Role.Administrator]}>
+                    <ProtectedRoute requiredRoles={[Role.BranchManager, Role.Administrator]}>
                         <DepartmentsForm key='update' />
                     </ProtectedRoute>
                 ) 

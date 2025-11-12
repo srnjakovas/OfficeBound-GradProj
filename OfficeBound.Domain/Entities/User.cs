@@ -20,6 +20,8 @@ public class User : BaseEntity
     
     public DateTime? ReviewedDate { get; set; }
     
+    public string? RejectionReason { get; set; }
+    
     public ICollection<Request> Requests { get; set; } = new List<Request>();
 }
 

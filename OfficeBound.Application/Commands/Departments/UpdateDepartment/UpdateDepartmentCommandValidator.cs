@@ -14,13 +14,7 @@ public class UpdateDepartmentCommandValidator : AbstractValidator<UpdateDepartme
             .NotEmpty()
             .WithMessage("Department Name cannot be empty")
             .MaximumLength(100)
-            .WithMessage("Department Name cannot be longer than 100 characters");
-        
-        RuleFor(x => x.Manager)
-            .NotEmpty()
-            .WithMessage("Manager cannot be empty")
-            .MaximumLength(100)
-            .WithMessage("Manager cannot be longer than 100 characters");
+            .WithMessage("Department Name cannot be longer than 20 characters");
 
         RuleFor(x => x.NumberOfPeople)
             .GreaterThan(0)

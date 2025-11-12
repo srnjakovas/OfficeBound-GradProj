@@ -11,6 +11,22 @@ public class RequestRepository : BaseRepository<Request>, IRequestRepository
     {
     }
 
+    public override async Task<IEnumerable<Request>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Include(r => r.Department)
+            .Include(r => r.Users)
+            .ToListAsync(cancellationToken);
+    }
+
+    public override async Task<Request?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Include(r => r.Department)
+            .Include(r => r.Users)
+            .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
+    }
+
     public async Task<int> CountByTypeAndDateAsync(RequestType requestType, DateTime requestDate, CancellationToken cancellationToken = default)
     {
         var dateOnly = requestDate.Date;

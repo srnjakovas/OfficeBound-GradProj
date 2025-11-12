@@ -10,7 +10,7 @@ export const hasPermission = (userRole: number, requiredRoles: Role[]): boolean 
 };
 
 export const canViewAllRequests = (userRole: number): boolean => {
-    return userRole === Role.Administrator;
+    return userRole === Role.Administrator || userRole === Role.BranchManager;
 };
 
 export const canViewDepartmentRequests = (userRole: number): boolean => {
@@ -26,7 +26,7 @@ export const canApproveAccounts = (userRole: number): boolean => {
 };
 
 export const canManageDepartments = (userRole: number): boolean => {
-    return userRole === Role.Administrator;
+    return userRole === Role.BranchManager || userRole === Role.Administrator;
 };
 
 export const canViewAllUsers = (userRole: number): boolean => {

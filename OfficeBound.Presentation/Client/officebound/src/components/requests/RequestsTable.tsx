@@ -27,13 +27,15 @@ import {
   TableRow,
 } from '@mui/material';
 import { useTranslation } from "react-i18next";
-import { t } from "i18next";
+import { hasPermission } from "../../utils/roles";
+import type { GetOfficeResourcesResponse } from "../../models/getOfficeResourcesResponse";
 
 type StatusFilter = number | null;
 
 export default function RequestsTable () {
     const [requests, setRequests] = useState<RequestDto[]>([]);
     const [departments, setDepartments] = useState<DepartmentDto[]>([]);
+    const [officeResources, setOfficeResources] = useState<GetOfficeResourcesResponse | null>(null);
     const [statusFilter, setStatusFilter] = useState<StatusFilter>(null);
     const [departmentFilter, setDepartmentFilter] = useState<number | null>(null);
     const [dateFilter, setDateFilter] = useState<string>('');
@@ -50,16 +52,30 @@ export default function RequestsTable () {
             ]);
             setRequests(fetchedRequests);
             setDepartments(fetchedDepartments);
+            
+            if (user && hasPermission(user.role, [Role.Manager, Role.BranchManager, Role.Administrator])) {
+                try {
+                    const resources = await apiConnector.getOfficeResources();
+                    setOfficeResources(resources);
+                } catch (error) {
+                    console.error('Error fetching office resources:', error);
+                }
+            }
         }
         
         fetchData();
-    }, []);
+    }, [user]);
 
     const filteredRequests = useMemo(() => {
         let filtered = requests;
         
         if (user) {
             if (user.role === Role.User) {
+                filtered = filtered.filter(request => 
+                    request.createdByUsername && 
+                    user.username && 
+                    request.createdByUsername.trim().toLowerCase() === user.username.trim().toLowerCase()
+                );
             } else if (canViewDepartmentRequests(user.role) && !canViewAllRequests(user.role)) {
                 if (user.departmentId) {
                     filtered = filtered.filter(request => request.departmentId === user.departmentId);
@@ -99,8 +115,47 @@ export default function RequestsTable () {
             cancelled: requests.filter(r => r.requestStatus === 2).length,
             pending: requests.filter(r => r.requestStatus === 3).length,
             expired: requests.filter(r => r.requestStatus === 4).length,
+            cancelledByUser: requests.filter(r => r.requestStatus === 5).length,
         };
     }, [requests]);
+
+    const availableSpaces = useMemo(() => {
+        if (!officeResources) return null;
+        
+        const targetDate = dateFilter ? new Date(dateFilter + 'T00:00:00') : (() => {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+            return tomorrow;
+        })();
+        targetDate.setHours(0, 0, 0, 0);
+        
+        const relevantRequests = requests.filter(request => {
+            if (!request.requestDate) return false;
+            const requestDate = new Date(request.requestDate);
+            requestDate.setHours(0, 0, 0, 0);
+            return requestDate.getTime() === targetDate.getTime() && 
+                   request.requestStatus === 0;
+        });
+        
+        const conferenceRoomCount = relevantRequests.filter(r => r.requestType === 0).length;
+        const conferenceRoomWithParkingCount = relevantRequests.filter(r => r.requestType === 1).length;
+        const deskCount = relevantRequests.filter(r => r.requestType === 2).length;
+        const deskWithParkingCount = relevantRequests.filter(r => r.requestType === 3).length;
+        
+        const totalDesksUsed = deskCount + deskWithParkingCount;
+        const totalConferenceRoomsUsed = conferenceRoomCount + conferenceRoomWithParkingCount;
+        const totalParkingUsed = deskWithParkingCount + conferenceRoomWithParkingCount;
+        
+        return {
+            desks: Math.max(0, officeResources.numberOfDesks - totalDesksUsed),
+            conferenceRooms: Math.max(0, officeResources.numberOfConferenceRooms - totalConferenceRoomsUsed),
+            parking: Math.max(0, officeResources.numberOfParkingSpaces - totalParkingUsed),
+            totalDesks: officeResources.numberOfDesks,
+            totalConferenceRooms: officeResources.numberOfConferenceRooms,
+            totalParking: officeResources.numberOfParkingSpaces
+        };
+    }, [requests, dateFilter, officeResources]);
 
     const handleStatusFilterChange = (
         event: React.MouseEvent<HTMLElement>,
@@ -202,6 +257,28 @@ export default function RequestsTable () {
                         variant="outlined"
                         size="small"
                     />
+                    {user && hasPermission(user.role, [Role.Manager, Role.BranchManager, Role.Administrator]) && availableSpaces && (
+                        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+                            <Chip 
+                                label={`${t('request.available.desks')}: ${availableSpaces.desks}/${availableSpaces.totalDesks}`}
+                                color={availableSpaces.desks > 0 ? "success" : "error"}
+                                variant="outlined"
+                                size="small"
+                            />
+                            <Chip 
+                                label={`${t('request.available.conference.rooms')}: ${availableSpaces.conferenceRooms}/${availableSpaces.totalConferenceRooms}`}
+                                color={availableSpaces.conferenceRooms > 0 ? "success" : "error"}
+                                variant="outlined"
+                                size="small"
+                            />
+                            <Chip 
+                                label={`${t('request.available.parking')}: ${availableSpaces.parking}/${availableSpaces.totalParking}`}
+                                color={availableSpaces.parking > 0 ? "success" : "error"}
+                                variant="outlined"
+                                size="small"
+                            />
+                        </Box>
+                    )}
                     <ToggleButtonGroup
                         value={statusFilter}
                         exclusive
@@ -268,13 +345,12 @@ export default function RequestsTable () {
                                     ? 'linear-gradient(135deg, #334155 0%, #475569 100%)'
                                     : 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)',
                             }}>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>ID</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>{t('general.description')}</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>{t('general.request.type')}</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>{t('general.department')}</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>{t('general.status')}</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>{t('general.request.date')}</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>{t('general.actions')}</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem', width: '8%' }}>ID</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem', width: '18%' }}>{t('general.request.type')}</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem', width: '18%' }}>{t('general.department')}</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem', width: '18%' }}>{t('general.status')}</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem', width: '12%' }}>{t('general.request.date')}</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem', width: '26%', minWidth: 200 }}>{t('general.actions')}</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -284,7 +360,7 @@ export default function RequestsTable () {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
+                                    <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
                                         <Box sx={{ textAlign: 'center' }}>
                                             <AssignmentIcon 
                                                 sx={{ 

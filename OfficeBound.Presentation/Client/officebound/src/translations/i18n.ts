@@ -13,6 +13,9 @@ i18n.use(initReactI18next).init({
   ns: ['translations'],
   defaultNS: 'translations',
   keySeparator: false,
+  interpolation: {
+    escapeValue: false,
+  },
 });
 
 export default i18n;
