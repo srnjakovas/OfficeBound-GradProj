@@ -1,15 +1,22 @@
 import {useEffect, useState} from "react";
 import type {DepartmentDto} from "../../models/departmentDto.ts";
 import apiConnector from "../../api/apiConnector.ts";
-import {Button, Container, Paper, Typography, Box, Fab, useTheme, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Tooltip} from "@mui/material";
+import {Button, Container, Paper, Typography, Box, Fab, useTheme, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Alert} from "@mui/material";
 import {Add as AddIcon, Business as BusinessIcon, Edit as EditIcon, Delete as DeleteIcon} from "@mui/icons-material";
 import {NavLink} from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../contexts/AuthContext";
-import { canManageDepartments } from "../../utils/roles";
+import { canManageDepartments, Role } from "../../utils/roles";
 
 export default function DepartmentsTable () {
     const [departments, setDepartments] = useState<DepartmentDto[]>([]);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [rejectionReasonDialogOpen, setRejectionReasonDialogOpen] = useState(false);
+    const [rejectionReason, setRejectionReason] = useState('');
+    const [rejectionReasonError, setRejectionReasonError] = useState<string | null>(null);
+    const [departmentToDelete, setDepartmentToDelete] = useState<DepartmentDto | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const theme = useTheme();
     const isDark = theme.palette.mode === 'dark';
     const { t } = useTranslation();
@@ -17,17 +24,59 @@ export default function DepartmentsTable () {
     
     useEffect(() => {
         const fetchData = async () => {
-            const fetchedDepartments = await apiConnector.getDepartments();
+            const fetchedDepartments = await apiConnector.getDepartments(user?.role);
             setDepartments(fetchedDepartments);
         }
         
         fetchData();
-    }, []);
+    }, [user]);
 
-    const handleDelete = async (id: number) => {
-        if (window.confirm(t('general.delete.warning'))) {
-            await apiConnector.deleteDepartment(id);
-            window.location.reload();
+    const handleDeleteClick = (department: DepartmentDto) => {
+        setDepartmentToDelete(department);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteConfirm = () => {
+        setDeleteDialogOpen(false);
+        setRejectionReasonDialogOpen(true);
+        setRejectionReason('');
+        setRejectionReasonError(null);
+    };
+
+    const handleRejectionReasonChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setRejectionReason(value);
+        
+        if (value.length > 0 && value.length < 50) {
+            setRejectionReasonError(t('validation.rejection.reason.min.length'));
+        } else {
+            setRejectionReasonError(null);
+        }
+    };
+
+    const handleRejectionReasonConfirm = async () => {
+        if (!departmentToDelete) return;
+
+        if (rejectionReason.trim().length < 50) {
+            setRejectionReasonError(t('validation.rejection.reason.min.length'));
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+        setRejectionReasonError(null);
+
+        try {
+            await apiConnector.deleteDepartment(departmentToDelete.id!, rejectionReason.trim());
+            setRejectionReasonDialogOpen(false);
+            setDepartmentToDelete(null);
+            setRejectionReason('');
+            const fetchedDepartments = await apiConnector.getDepartments(user?.role);
+            setDepartments(fetchedDepartments);
+        } catch (err: any) {
+            setError(err.response?.data?.message || 'Failed to remove department');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -78,6 +127,9 @@ export default function DepartmentsTable () {
                                 <TableCell sx={{ color: 'white', fontWeight: 600 }}>Manager ID</TableCell>
                                 <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('departments.number.of.people')}</TableCell>
                                 <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('general.created.date')}</TableCell>
+                                {user?.role === Role.Administrator && (
+                                    <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('user.rejection.reason')}</TableCell>
+                                )}
                                 <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('general.actions')}</TableCell>
                             </TableRow>
                         </TableHead>
@@ -86,41 +138,52 @@ export default function DepartmentsTable () {
                                 departments.map((department) => (
                                     <TableRow key={department.id} hover>
                                         <TableCell>{department.id}</TableCell>
-                                        <TableCell>{department.departmentName}</TableCell>
+                                        <TableCell>
+                                            {department.departmentName}
+                                        </TableCell>
                                         <TableCell>{department.managerName || '-'}</TableCell>
                                         <TableCell>{department.managerId || '-'}</TableCell>
                                         <TableCell>{department.numberOfPeople}</TableCell>
                                         <TableCell>
                                             {department.createdDate ? new Date(department.createdDate).toLocaleDateString() : '-'}
                                         </TableCell>
+                                        {user?.role === Role.Administrator && (
+                                            <TableCell>
+                                                {department.rejectionReason || '-'}
+                                            </TableCell>
+                                        )}
                                         <TableCell>
                                             <Box sx={{ display: 'flex', gap: 1 }}>
-                                                <Tooltip title="Edit Department">
-                                                    <IconButton
-                                                        component={NavLink}
-                                                        to={`/editDepartment/${department.id}`}
-                                                        color="primary"
-                                                        size="small"
-                                                    >
-                                                        <EditIcon fontSize="small" />
-                                                    </IconButton>
-                                                </Tooltip>
-                                                <Tooltip title="Delete Department">
-                                                    <IconButton
-                                                        onClick={() => handleDelete(department.id!)}
-                                                        color="error"
-                                                        size="small"
-                                                    >
-                                                        <DeleteIcon fontSize="small" />
-                                                    </IconButton>
-                                                </Tooltip>
+                                                {department.isActive !== false && canManageDepartments(user?.role) && (
+                                                    <>
+                                                        <Tooltip title="Edit Department">
+                                                            <IconButton
+                                                                component={NavLink}
+                                                                to={`/editDepartment/${department.id}`}
+                                                                color="primary"
+                                                                size="small"
+                                                            >
+                                                                <EditIcon fontSize="small" />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                        <Tooltip title={t('user.remove')}>
+                                                            <IconButton
+                                                                onClick={() => handleDeleteClick(department)}
+                                                                color="error"
+                                                                size="small"
+                                                            >
+                                                                <DeleteIcon fontSize="small" />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    </>
+                                                )}
                                             </Box>
                                         </TableCell>
                                     </TableRow>
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
+                                    <TableCell colSpan={user?.role === Role.Administrator ? 8 : 7} align="center" sx={{ py: 6 }}>
                                         <Box sx={{ textAlign: 'center' }}>
                                             <BusinessIcon sx={{ fontSize: 64, color: 'text.secondary', opacity: 0.5, mb: 2 }} />
                                             <Typography variant="h6" color="text.secondary" gutterBottom>
@@ -160,6 +223,59 @@ export default function DepartmentsTable () {
                     <AddIcon />
                 </Fab>
             )}
+
+            {error && (
+                <Alert severity="error" sx={{ mt: 2 }} onClose={() => setError(null)}>
+                    {error}
+                </Alert>
+            )}
+
+            <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+                <DialogTitle>{t('user.remove')}</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        {t('general.delete.warning')}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDeleteDialogOpen(false)}>{t('general.no')}</Button>
+                    <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+                        {t('general.yes')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog open={rejectionReasonDialogOpen} onClose={() => setRejectionReasonDialogOpen(false)} maxWidth="md" fullWidth>
+                <DialogTitle>{t('user.rejection.reason')}</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label={t('user.rejection.reason')}
+                        fullWidth
+                        multiline
+                        rows={4}
+                        value={rejectionReason}
+                        onChange={handleRejectionReasonChange}
+                        error={!!rejectionReasonError}
+                        helperText={rejectionReasonError || t('validation.rejection.reason.min.length')}
+                        required
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setRejectionReasonDialogOpen(false)} disabled={loading}>
+                        {t('general.back')}
+                    </Button>
+                    <Button 
+                        onClick={handleRejectionReasonConfirm} 
+                        color="error" 
+                        variant="contained"
+                        disabled={!rejectionReason.trim() || rejectionReason.trim().length < 50 || loading}
+                    >
+                        {loading ? t('general.loading') : t('user.remove')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Container>
     )
 }

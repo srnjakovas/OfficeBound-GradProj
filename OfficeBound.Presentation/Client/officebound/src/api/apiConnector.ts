@@ -57,9 +57,12 @@ const apiConnector = {
         return response.data.requestDto;
     },
     
-    getDepartments: async (): Promise<DepartmentDto[]> => {
+    getDepartments: async (userRole?: number): Promise<DepartmentDto[]> => {
+        const url = userRole !== undefined 
+            ? `${API_BASE_URL}/departments?userRole=${userRole}`
+            : `${API_BASE_URL}/departments`;
         const response: AxiosResponse<GetDepartmentsResponse> =
-            await axios.get(`${API_BASE_URL}/departments`);
+            await axios.get(url);
         return response.data.departmentsDtos;
     },
     
@@ -92,8 +95,10 @@ const apiConnector = {
         return response.data.usersDtos;
     },
     
-    deleteDepartment: async (departmentId: number): Promise<void> => {
-        await axios.delete<number>(`${API_BASE_URL}/departments/${departmentId}`);
+    deleteDepartment: async (departmentId: number, rejectionReason: string): Promise<void> => {
+        await axios.delete<number>(`${API_BASE_URL}/departments/${departmentId}`, {
+            data: { rejectionReason }
+        });
     },
     
     signUp: async (username: string, password: string, confirmPassword: string): Promise<SignUpResponse> => {

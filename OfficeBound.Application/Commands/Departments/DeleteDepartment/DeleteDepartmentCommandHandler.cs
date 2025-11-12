@@ -26,7 +26,18 @@ public class DeleteDepartmentCommandHandler : IRequestHandler<DeleteDepartmentCo
             throw new NotFoundException($"{nameof(Department)} with Id: {command.Id} was not found in Database");
         }
 
-        await _departmentRepository.DeleteAsync(department, cancellationToken);
+        if (string.IsNullOrWhiteSpace(command.RejectionReason))
+        {
+            throw new CustomValidationException(new List<OfficeBound.Contracts.Errors.ValidationError>
+            {
+                new() { Property = "RejectionReason", ErrorMessage = "Rejection reason is required" }
+            });
+        }
+
+        department.IsActive = false;
+        department.RejectionReason = command.RejectionReason;
+
+        await _departmentRepository.UpdateAsync(department, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         return Unit.Value;

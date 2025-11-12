@@ -30,10 +30,12 @@ import {
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { getRequestStatusLabel, getRequestStatusColor } from "../../utils/requestStatus";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function RequestsPreview () {
     const {id} = useParams();
     const { t } = useTranslation();
+    const { user } = useAuth();
 
     const isoToDateString = (isoString: string | undefined): string => {
         if (!isoString) return '';
@@ -55,8 +57,8 @@ export default function RequestsPreview () {
     const [departments, setDepartments] = useState<Array<{id: number, name: string}>>([]);
 
     useEffect(() => {
-        apiConnector.getDepartments().then(deps => {
-            setDepartments(deps.map(d => ({ id: d.id!, name: d.departmentName })));
+        apiConnector.getDepartments(user?.role).then(deps => {
+            setDepartments(deps.filter(d => d.isActive).map(d => ({ id: d.id!, name: d.departmentName })));
         });
 
         if (id) {

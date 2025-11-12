@@ -81,8 +81,8 @@ export default function RequestsForm () {
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     useEffect(() => {
-        apiConnector.getDepartments().then(deps => {
-            setDepartments(deps.map(d => ({ id: d.id!, name: d.departmentName })));
+        apiConnector.getDepartments(user?.role).then(deps => {
+            setDepartments(deps.filter(d => d.isActive).map(d => ({ id: d.id!, name: d.departmentName })));
         });
 
         if (id) {

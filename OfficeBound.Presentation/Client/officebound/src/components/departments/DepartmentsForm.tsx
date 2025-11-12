@@ -46,6 +46,8 @@ export default function DepartmentsForm () {
         managerName: null,
         numberOfPeople: 0,
         createdDate: undefined,
+        isActive: true,
+        rejectionReason: null,
     });
 
     const [users, setUsers] = useState<UserDto[]>([]);

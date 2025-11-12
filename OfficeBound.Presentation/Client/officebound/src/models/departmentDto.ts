@@ -5,5 +5,7 @@ export interface DepartmentDto {
     managerName: string | null | undefined,
     numberOfPeople: number,
     createdDate: string | undefined,
+    isActive: boolean,
+    rejectionReason: string | null | undefined,
 }
 

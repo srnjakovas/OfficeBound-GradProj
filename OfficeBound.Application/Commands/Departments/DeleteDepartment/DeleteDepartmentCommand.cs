@@ -2,5 +2,5 @@ using MediatR;
 
 namespace OfficeBound.Application.Commands.Departments.DeleteDepartment;
 
-public record DeleteDepartmentCommand(int Id) : IRequest<Unit>;
+public record DeleteDepartmentCommand(int Id, string RejectionReason) : IRequest<Unit>;
 

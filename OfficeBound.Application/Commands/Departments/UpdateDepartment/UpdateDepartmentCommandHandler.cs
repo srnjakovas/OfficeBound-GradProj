@@ -101,7 +101,6 @@ public class UpdateDepartmentCommandHandler : IRequestHandler<UpdateDepartmentCo
         {
         }
 
-        // Only administrators can change department name
         if (command.DepartmentName != department.DepartmentName)
         {
             if (!command.UserId.HasValue)

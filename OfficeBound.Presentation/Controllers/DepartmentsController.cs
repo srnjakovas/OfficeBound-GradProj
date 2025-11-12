@@ -24,9 +24,10 @@ public class DepartmentsController : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(typeof(GetDepartmentsResponse), StatusCodes.Status200OK)]
-    public async Task<ActionResult<GetDepartmentsResponse>> GetDepartments(CancellationToken cancellationToken)
+    public async Task<ActionResult<GetDepartmentsResponse>> GetDepartments([FromQuery] int? userRole, CancellationToken cancellationToken)
     {
-        var response = await _mediator.Send(new GetDepartmentsQuery(), cancellationToken);
+        var role = userRole.HasValue ? (OfficeBound.Domain.Enumerations.Role?)userRole.Value : null;
+        var response = await _mediator.Send(new GetDepartmentsQuery(role), cancellationToken);
         return Ok(response);
     }
 
@@ -63,9 +64,9 @@ public class DepartmentsController : ControllerBase
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> DeleteDepartment(int id, CancellationToken cancellationToken)
+    public async Task<ActionResult> DeleteDepartment(int id, [FromBody] DeleteDepartmentRequest deleteRequest, CancellationToken cancellationToken)
     {
-        var command = new DeleteDepartmentCommand(id);
+        var command = new DeleteDepartmentCommand(id, deleteRequest.RejectionReason);
         await _mediator.Send(command, cancellationToken);
         return Ok();
     }

@@ -48,7 +48,7 @@ export default function RequestsTable () {
         const fetchData = async () => {
             const [fetchedRequests, fetchedDepartments] = await Promise.all([
                 apiConnector.getRequests(),
-                apiConnector.getDepartments()
+                apiConnector.getDepartments(user?.role)
             ]);
             setRequests(fetchedRequests);
             setDepartments(fetchedDepartments);
@@ -215,7 +215,7 @@ export default function RequestsTable () {
                             label={t('general.department')}
                         >
                             <MenuItem value="">All Departments</MenuItem>
-                            {departments.map((dept) => (
+                            {departments.filter(d => d.isActive).map((dept) => (
                                 <MenuItem key={dept.id} value={dept.id}>
                                     {dept.departmentName}
                                 </MenuItem>

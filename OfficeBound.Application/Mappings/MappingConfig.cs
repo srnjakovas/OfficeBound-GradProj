@@ -27,7 +27,9 @@ public class MappingConfig
 
         TypeAdapterConfig<Department, DepartmentDto>.NewConfig()
             .Map(dest => dest.ManagerId, src => src.ManagerId)
-            .Map(dest => dest.ManagerName, src => src.Manager != null ? src.Manager.Username : null);
+            .Map(dest => dest.ManagerName, src => src.Manager != null ? src.Manager.Username : null)
+            .Map(dest => dest.IsActive, src => src.IsActive)
+            .Map(dest => dest.RejectionReason, src => src.RejectionReason);
 
         TypeAdapterConfig<List<User>, GetUsersResponse>.NewConfig()
             .Map(dest => dest.UsersDtos, src => src);

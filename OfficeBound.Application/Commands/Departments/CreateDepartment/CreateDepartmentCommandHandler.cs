@@ -79,7 +79,8 @@ public class CreateDepartmentCommandHandler : IRequestHandler<CreateDepartmentCo
             DepartmentName = command.DepartmentName,
             ManagerId = command.ManagerId,
             NumberOfPeople = command.NumberOfPeople,
-            CreatedDate = DateTime.UtcNow
+            CreatedDate = DateTime.UtcNow,
+            IsActive = true
         };
 
         await _departmentRepository.AddAsync(department, cancellationToken);

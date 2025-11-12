@@ -10,6 +10,10 @@ public class Department : BaseEntity
     
     public int NumberOfPeople { get; set; }
     
+    public bool IsActive { get; set; } = true;
+    
+    public string? RejectionReason { get; set; }
+    
     public ICollection<User> Users { get; set; } = new List<User>();
 }
 

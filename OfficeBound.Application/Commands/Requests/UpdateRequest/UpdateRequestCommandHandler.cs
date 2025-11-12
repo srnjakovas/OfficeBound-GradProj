@@ -54,7 +54,6 @@ public class UpdateRequestCommandHandler : IRequestHandler<UpdateRequestCommand,
             });
         }
 
-        // Branch Managers cannot request Desk or DeskWithParking (they have their own office)
         if (request.RequestType == RequestType.Desk || request.RequestType == RequestType.DeskWithParking)
         {
             if (user.Role == Role.BranchManager)
@@ -66,7 +65,6 @@ public class UpdateRequestCommandHandler : IRequestHandler<UpdateRequestCommand,
             }
         }
 
-        // Only Managers, Branch Managers, and Administrators can request Conference Room types
         if (request.RequestType == RequestType.ConferenceRoom || request.RequestType == RequestType.ConferenceRoomWithParking)
         {
             if (user.Role != Role.Manager && user.Role != Role.BranchManager && user.Role != Role.Administrator)

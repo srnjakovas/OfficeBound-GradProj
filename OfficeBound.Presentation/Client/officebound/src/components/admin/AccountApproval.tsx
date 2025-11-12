@@ -73,7 +73,7 @@ export default function AccountApproval() {
         try {
             const [requests, depts, users, hasBranchManagerResult] = await Promise.all([
                 apiConnector.getUserAccountRequests(),
-                apiConnector.getDepartments(),
+                apiConnector.getDepartments(user?.role),
                 apiConnector.getUsers(),
                 apiConnector.hasBranchManager()
             ]);
