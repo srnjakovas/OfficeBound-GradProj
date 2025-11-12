@@ -6,7 +6,8 @@ export const getRequestStatusLabels = (t: TFunction): Record<number, string> => 
         1: t('request.status.rejected'),
         2: t('request.status.cancelled'),
         3: t('request.status.pending'),
-        4: t('request.status.expired')
+        4: t('request.status.expired'),
+        5: t('request.status.cancelled.by.user')
     };
 };
 
@@ -21,7 +22,8 @@ export const getRequestStatusColor = (status: number): "success" | "error" | "wa
         1: 'error',
         2: 'warning',
         3: 'info',
-        4: 'default'
+        4: 'default',
+        5: 'warning'
     };
     return colorMap[status] || 'default';
 };

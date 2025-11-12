@@ -5,12 +5,15 @@ import {Button, Container, Paper, Typography, Box, Fab, useTheme, Table, TableBo
 import {Add as AddIcon, Business as BusinessIcon, Edit as EditIcon, Delete as DeleteIcon} from "@mui/icons-material";
 import {NavLink} from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../contexts/AuthContext";
+import { canManageDepartments } from "../../utils/roles";
 
 export default function DepartmentsTable () {
     const [departments, setDepartments] = useState<DepartmentDto[]>([]);
     const theme = useTheme();
     const isDark = theme.palette.mode === 'dark';
     const { t } = useTranslation();
+    const { user } = useAuth();
     
     useEffect(() => {
         const fetchData = async () => {
@@ -43,15 +46,17 @@ export default function DepartmentsTable () {
                         {t('general.departments')}
                     </Typography>
                 </Box>
-                <Button
-                    component={NavLink}
-                    to="/createDepartment"
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    sx={{ mb: 2 }}
-                >
-                    {t('department.add.new')}
-                </Button>
+                {user && canManageDepartments(user.role) && (
+                    <Button
+                        component={NavLink}
+                        to="/createDepartment"
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        sx={{ mb: 2 }}
+                    >
+                        {t('department.add.new')}
+                    </Button>
+                )}
             </Box>
             
             <Paper elevation={0} sx={{ 
@@ -121,14 +126,16 @@ export default function DepartmentsTable () {
                                             <Typography variant="h6" color="text.secondary" gutterBottom>
                                                 {t('general.not.found')}
                                             </Typography>
-                                            <Button
-                                                component={NavLink}
-                                                to="/createDepartment"
-                                                variant="contained"
-                                                startIcon={<AddIcon />}
-                                            >
-                                                {t('department.add.new')}
-                                            </Button>
+                                            {user && canManageDepartments(user.role) && (
+                                                <Button
+                                                    component={NavLink}
+                                                    to="/createDepartment"
+                                                    variant="contained"
+                                                    startIcon={<AddIcon />}
+                                                >
+                                                    {t('department.add.new')}
+                                                </Button>
+                                            )}
                                         </Box>
                                     </TableCell>
                                 </TableRow>
@@ -138,7 +145,7 @@ export default function DepartmentsTable () {
                 </TableContainer>
             </Paper>
             
-            {departments.length > 0 && (
+            {departments.length > 0 && user && canManageDepartments(user.role) && (
                 <Fab
                     color="primary"
                     aria-label="add"

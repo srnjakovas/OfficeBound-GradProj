@@ -315,7 +315,7 @@ export default function Header({ darkMode, setDarkMode }: HeaderProps) {
                 {user && canApproveAccounts(user.role) && (
                   <MenuItem component={NavLink} to="/account-approvals" onClick={handleClose}>
                     <AdminPanelSettings sx={{ mr: 1 }} />
-                    {t('general.accountApprovals')}
+                    {t('general.account.approvals')}
                   </MenuItem>
                 )}
               </>

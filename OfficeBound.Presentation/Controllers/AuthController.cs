@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OfficeBound.Application.Commands.Auth.Login;
 using OfficeBound.Application.Commands.Auth.SignUp;
+using OfficeBound.Application.Configuration;
 using OfficeBound.Application.Queries.Users.GetUsers;
 using OfficeBound.Contracts.Requests;
 using OfficeBound.Contracts.Responses;
@@ -27,7 +28,7 @@ public class AuthController : ControllerBase
     {
         var command = new SignUpCommand(signUpRequest.Username, signUpRequest.Password, signUpRequest.ConfirmPassword);
         var userId = await _mediator.Send(command, cancellationToken);
-        return Ok(new SignUpResponse(userId, "Account request submitted successfully. Please wait for administrator approval."));
+        return Ok(new SignUpResponse(userId, Constants.AccountSubmittedSuccessfullyMessage));
     }
 
     [HttpPost("Login")]

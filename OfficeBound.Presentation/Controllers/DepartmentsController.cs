@@ -55,7 +55,7 @@ public class DepartmentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> UpdateDepartment(int id, [FromBody] UpdateDepartment updateDepartment, CancellationToken cancellationToken)
     {
-        var command = new UpdateDepartmentCommand(id, updateDepartment.DepartmentName, updateDepartment.ManagerId, updateDepartment.NumberOfPeople);
+        var command = new UpdateDepartmentCommand(id, updateDepartment.DepartmentName, updateDepartment.ManagerId, updateDepartment.NumberOfPeople, updateDepartment.UserId);
         await _mediator.Send(command, cancellationToken);
         return Ok();
     }

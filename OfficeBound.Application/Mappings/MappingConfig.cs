@@ -15,6 +15,10 @@ public class MappingConfig
         TypeAdapterConfig<Request, GetRequestByIdResponse>.NewConfig()
             .Map(dest => dest.RequestDto, src => src);
 
+        TypeAdapterConfig<Request, RequestDto>.NewConfig()
+            .Map(dest => dest.DepartmentName, src => src.Department != null ? src.Department.DepartmentName : null)
+            .Map(dest => dest.CreatedByUsername, src => src.Users != null && src.Users.Any() ? src.Users.First().Username : null);
+
         TypeAdapterConfig<List<Department>, GetDepartmentsResponse>.NewConfig()
             .Map(dest => dest.DepartmentsDtos, src => src);
         

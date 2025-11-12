@@ -16,12 +16,14 @@ public class GetRequestByIdQueryHandler : IRequestHandler<GetRequestByIdQuery, G
 
     public async Task<GetRequestByIdResponse> Handle(GetRequestByIdQuery request, CancellationToken cancellationToken)
     {
-        var requestById = await _requestRepository.GetByIdAsync(request.Id);
+        var requestById = await _requestRepository.GetByIdAsync(request.Id, cancellationToken);
 
         if (requestById is null)
         {
             throw new NotFoundException($"{nameof(Request)} with Id: {request.Id} was not found in Database");
         }
+
+        var createdByUsername = requestById.Users?.FirstOrDefault()?.Username;
 
         var requestDto = new Contracts.Dtos.RequestDto(
             requestById.Id,
@@ -32,7 +34,8 @@ public class GetRequestByIdQueryHandler : IRequestHandler<GetRequestByIdQuery, G
             requestById.RequestStatus,
             requestById.RejectionReason,
             requestById.DepartmentId,
-            requestById.Department?.DepartmentName
+            requestById.Department?.DepartmentName,
+            createdByUsername
         );
 
         return new GetRequestByIdResponse(requestDto);

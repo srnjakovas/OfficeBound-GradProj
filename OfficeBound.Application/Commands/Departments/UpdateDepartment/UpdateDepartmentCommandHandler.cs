@@ -101,6 +101,44 @@ public class UpdateDepartmentCommandHandler : IRequestHandler<UpdateDepartmentCo
         {
         }
 
+        // Only administrators can change department name
+        if (command.DepartmentName != department.DepartmentName)
+        {
+            if (!command.UserId.HasValue)
+            {
+                errors.Add(new Contracts.Errors.ValidationError
+                {
+                    Property = nameof(UpdateDepartmentCommand.DepartmentName),
+                    ErrorMessage = "User information is required to update department name"
+                });
+            }
+            else
+            {
+                var requestingUser = await _userRepository.GetByIdAsync(command.UserId.Value, cancellationToken);
+                if (requestingUser == null)
+                {
+                    errors.Add(new Contracts.Errors.ValidationError
+                    {
+                        Property = nameof(UpdateDepartmentCommand.DepartmentName),
+                        ErrorMessage = "User not found"
+                    });
+                }
+                else if (requestingUser.Role != Role.Administrator)
+                {
+                    errors.Add(new Contracts.Errors.ValidationError
+                    {
+                        Property = nameof(UpdateDepartmentCommand.DepartmentName),
+                        ErrorMessage = "Only administrators can edit department name"
+                    });
+                }
+            }
+
+            if (errors.Any())
+            {
+                throw new CustomValidationException(errors);
+            }
+        }
+
         department.DepartmentName = command.DepartmentName;
         department.ManagerId = command.ManagerId;
         department.NumberOfPeople = command.NumberOfPeople;

@@ -1,7 +1,9 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using OfficeBound.Application.Commands.Auth.DeleteUser;
 using OfficeBound.Application.Commands.Auth.ReviewAccount;
 using OfficeBound.Application.Queries.Auth.GetUserAccountRequests;
+using OfficeBound.Application.Queries.Users.HasBranchManager;
 using OfficeBound.Contracts.Requests;
 using OfficeBound.Contracts.Responses;
 
@@ -37,10 +39,29 @@ public class AdminController : ControllerBase
             reviewRequest.UserId,
             reviewRequest.IsApproved,
             reviewRequest.Position,
-            reviewRequest.DepartmentId);
+            reviewRequest.DepartmentId,
+            reviewRequest.SetAsBranchManager);
         
         await _mediator.Send(command, cancellationToken);
         return Ok();
+    }
+
+    [HttpDelete("Users/{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> DeleteUser(int id, [FromBody] DeleteUserRequest deleteRequest, CancellationToken cancellationToken)
+    {
+        var command = new DeleteUserCommand(id, deleteRequest.RejectionReason);
+        await _mediator.Send(command, cancellationToken);
+        return Ok();
+    }
+
+    [HttpGet("HasBranchManager")]
+    [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+    public async Task<ActionResult<bool>> HasBranchManager(CancellationToken cancellationToken)
+    {
+        var hasBranchManager = await _mediator.Send(new HasBranchManagerQuery(), cancellationToken);
+        return Ok(hasBranchManager);
     }
 }
 

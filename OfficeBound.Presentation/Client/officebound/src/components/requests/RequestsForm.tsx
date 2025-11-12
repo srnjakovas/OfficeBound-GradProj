@@ -33,7 +33,6 @@ import {
 import { useTranslation } from "react-i18next";
 import { getRequestStatusLabel, getRequestStatusColor } from "../../utils/requestStatus";
 import { useAuth } from "../../contexts/AuthContext";
-import { Role, hasPermission } from "../../utils/roles";
 
 export default function RequestsForm () {
     const {id} = useParams();
@@ -192,7 +191,8 @@ export default function RequestsForm () {
     const handleSelectChange = (e: any) => {
         const { name, value } = e.target;
         if (name === 'requestType') {
-            setRequest((prev) => ({ ...prev, requestType: value }));
+            const requestTypeValue = typeof value === 'string' ? parseInt(value, 10) : value;
+            setRequest((prev) => ({ ...prev, requestType: requestTypeValue }));
         } else if (name === 'departmentId') {
             setRequest((prev) => ({ 
                 ...prev, 
@@ -306,14 +306,10 @@ export default function RequestsForm () {
                                         </InputAdornment>
                                     }
                                 >
-                                    <MenuItem value={0}>{t('request.type.desk')}</MenuItem>
-                                    <MenuItem value={1}>{t('request.type.desk.with.parking')}</MenuItem>
-                                    {user && hasPermission(user.role, [Role.Manager, Role.BranchManager, Role.Administrator]) && (
-                                        <>
-                                            <MenuItem value={2}>{t('request.type.conference.room')}</MenuItem>
-                                            <MenuItem value={3}>{t('request.type.conference.room.with.parking')}</MenuItem>
-                                        </>
-                                    )}
+                                    <MenuItem value={0}>{t('request.type.conference.room')}</MenuItem>
+                                    <MenuItem value={1}>{t('request.type.conference.room.with.parking')}</MenuItem>
+                                    <MenuItem value={2}>{t('request.type.desk')}</MenuItem>
+                                    <MenuItem value={3}>{t('request.type.desk.with.parking')}</MenuItem>
                                 </Select>
                             </FormControl>
 

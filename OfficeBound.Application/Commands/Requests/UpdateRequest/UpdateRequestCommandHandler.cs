@@ -37,26 +37,38 @@ public class UpdateRequestCommandHandler : IRequestHandler<UpdateRequestCommand,
             throw new NotFoundException($"{nameof(Request)} with Id: {request.Id} was not found in Database");
         }
 
-        // Validate user can select Conference Room types
+        if (!request.UserId.HasValue)
+        {
+            throw new CustomValidationException(new List<Contracts.Errors.ValidationError>
+            {
+                new() { Property = nameof(UpdateRequestCommand.RequestType), ErrorMessage = "User information is required" }
+            });
+        }
+
+        var user = await _userRepository.GetByIdAsync(request.UserId.Value, cancellationToken);
+        if (user == null)
+        {
+            throw new CustomValidationException(new List<Contracts.Errors.ValidationError>
+            {
+                new() { Property = nameof(UpdateRequestCommand.RequestType), ErrorMessage = "User not found" }
+            });
+        }
+
+        // Branch Managers cannot request Desk or DeskWithParking (they have their own office)
+        if (request.RequestType == RequestType.Desk || request.RequestType == RequestType.DeskWithParking)
+        {
+            if (user.Role == Role.BranchManager)
+            {
+                throw new CustomValidationException(new List<Contracts.Errors.ValidationError>
+                {
+                    new() { Property = nameof(UpdateRequestCommand.RequestType), ErrorMessage = "Branch Managers cannot request desks as they have their own office" }
+                });
+            }
+        }
+
+        // Only Managers, Branch Managers, and Administrators can request Conference Room types
         if (request.RequestType == RequestType.ConferenceRoom || request.RequestType == RequestType.ConferenceRoomWithParking)
         {
-            if (!request.UserId.HasValue)
-            {
-                throw new CustomValidationException(new List<Contracts.Errors.ValidationError>
-                {
-                    new() { Property = nameof(UpdateRequestCommand.RequestType), ErrorMessage = "User information is required for Conference Room requests" }
-                });
-            }
-
-            var user = await _userRepository.GetByIdAsync(request.UserId.Value, cancellationToken);
-            if (user == null)
-            {
-                throw new CustomValidationException(new List<Contracts.Errors.ValidationError>
-                {
-                    new() { Property = nameof(UpdateRequestCommand.RequestType), ErrorMessage = "User not found" }
-                });
-            }
-
             if (user.Role != Role.Manager && user.Role != Role.BranchManager && user.Role != Role.Administrator)
             {
                 throw new CustomValidationException(new List<Contracts.Errors.ValidationError>

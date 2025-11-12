@@ -27,7 +27,6 @@ import {
   TableRow,
 } from '@mui/material';
 import { useTranslation } from "react-i18next";
-import { t } from "i18next";
 import { hasPermission } from "../../utils/roles";
 import type { GetOfficeResourcesResponse } from "../../models/getOfficeResourcesResponse";
 
@@ -72,6 +71,11 @@ export default function RequestsTable () {
         
         if (user) {
             if (user.role === Role.User) {
+                filtered = filtered.filter(request => 
+                    request.createdByUsername && 
+                    user.username && 
+                    request.createdByUsername.trim().toLowerCase() === user.username.trim().toLowerCase()
+                );
             } else if (canViewDepartmentRequests(user.role) && !canViewAllRequests(user.role)) {
                 if (user.departmentId) {
                     filtered = filtered.filter(request => request.departmentId === user.departmentId);
@@ -111,6 +115,7 @@ export default function RequestsTable () {
             cancelled: requests.filter(r => r.requestStatus === 2).length,
             pending: requests.filter(r => r.requestStatus === 3).length,
             expired: requests.filter(r => r.requestStatus === 4).length,
+            cancelledByUser: requests.filter(r => r.requestStatus === 5).length,
         };
     }, [requests]);
 
@@ -130,13 +135,13 @@ export default function RequestsTable () {
             const requestDate = new Date(request.requestDate);
             requestDate.setHours(0, 0, 0, 0);
             return requestDate.getTime() === targetDate.getTime() && 
-                   (request.requestStatus === 0 || request.requestStatus === 3); // Approved or Pending
+                   request.requestStatus === 0;
         });
         
-        const deskCount = relevantRequests.filter(r => r.requestType === 0).length; // Desk
-        const deskWithParkingCount = relevantRequests.filter(r => r.requestType === 1).length; // DeskWithParking
-        const conferenceRoomCount = relevantRequests.filter(r => r.requestType === 2).length; // ConferenceRoom
-        const conferenceRoomWithParkingCount = relevantRequests.filter(r => r.requestType === 3).length; // ConferenceRoomWithParking
+        const conferenceRoomCount = relevantRequests.filter(r => r.requestType === 0).length;
+        const conferenceRoomWithParkingCount = relevantRequests.filter(r => r.requestType === 1).length;
+        const deskCount = relevantRequests.filter(r => r.requestType === 2).length;
+        const deskWithParkingCount = relevantRequests.filter(r => r.requestType === 3).length;
         
         const totalDesksUsed = deskCount + deskWithParkingCount;
         const totalConferenceRoomsUsed = conferenceRoomCount + conferenceRoomWithParkingCount;
@@ -340,13 +345,12 @@ export default function RequestsTable () {
                                     ? 'linear-gradient(135deg, #334155 0%, #475569 100%)'
                                     : 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)',
                             }}>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>ID</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>{t('general.description')}</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>{t('general.request.type')}</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>{t('general.department')}</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>{t('general.status')}</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>{t('general.request.date')}</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>{t('general.actions')}</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem', width: '8%' }}>ID</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem', width: '18%' }}>{t('general.request.type')}</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem', width: '18%' }}>{t('general.department')}</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem', width: '18%' }}>{t('general.status')}</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem', width: '12%' }}>{t('general.request.date')}</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem', width: '26%', minWidth: 200 }}>{t('general.actions')}</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -356,7 +360,7 @@ export default function RequestsTable () {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
+                                    <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
                                         <Box sx={{ textAlign: 'center' }}>
                                             <AssignmentIcon 
                                                 sx={{ 

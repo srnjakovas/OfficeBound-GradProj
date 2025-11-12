@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using OfficeBound.Domain.Entities;
+using OfficeBound.Domain.Enumerations;
 using OfficeBound.Domain.Repositories;
 
 namespace OfficeBound.Infrastructure.Repositories;
@@ -28,6 +29,12 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         return await DbSet
             .Where(u => !u.IsApproved && !u.ReviewedDate.HasValue)
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<bool> HasBranchManagerAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .AnyAsync(u => u.Role == Role.BranchManager && u.IsApproved, cancellationToken);
     }
 }
 

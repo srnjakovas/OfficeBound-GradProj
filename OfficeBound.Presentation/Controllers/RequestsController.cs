@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OfficeBound.Application.Commands.Requests.ApproveRequest;
+using OfficeBound.Application.Commands.Requests.CancelRequest;
 using OfficeBound.Application.Commands.Requests.CreateRequest;
 using OfficeBound.Application.Commands.Requests.DeleteRequest;
 using OfficeBound.Application.Commands.Requests.RejectRequest;
@@ -91,6 +92,17 @@ public class RequestsController : ControllerBase
     public async Task<ActionResult> RejectRequest(int id, [FromBody] RejectRequestRequest rejectRequest, CancellationToken cancellationToken)
     {
         var command = new RejectRequestCommand(id, rejectRequest.RejectionReason);
+        await _mediator.Send(command, cancellationToken);
+        return Ok();
+    }
+
+    [HttpPost("{id}/Cancel")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> CancelRequest(int id, [FromBody] CancelRequestRequest cancelRequest, CancellationToken cancellationToken)
+    {
+        var command = new CancelRequestCommand(id, cancelRequest.CancellationReason, cancelRequest.UserId);
         await _mediator.Send(command, cancellationToken);
         return Ok();
     }

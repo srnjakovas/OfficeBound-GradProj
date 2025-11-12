@@ -20,7 +20,6 @@ import {
 import { 
   ArrowBack as ArrowBackIcon,
   Business as BusinessIcon,
-  Person as PersonIcon,
   Group as GroupIcon,
   Save as SaveIcon,
   Cancel as CancelIcon,
@@ -28,11 +27,17 @@ import {
   Add as AddIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../contexts/AuthContext";
+import { Role } from "../../utils/roles";
 
 export default function DepartmentsForm () {
     const {id} = useParams();
     const navigate = useNavigate();
     const { t } = useTranslation();
+    const { user } = useAuth();
+    const isAdministrator = user?.role === Role.Administrator;
+    const isEditMode = !!id;
+    const canEditDepartmentName = isAdministrator || !isEditMode;
 
     const [department, setDepartment] = useState<DepartmentDto>({
         id: undefined,
@@ -104,7 +109,7 @@ export default function DepartmentsForm () {
             });
         }
         else {
-            apiConnector.editDepartment(department).then(() => navigate('/departments')).catch((error: any) => {
+            apiConnector.editDepartment(department, user?.id).then(() => navigate('/departments')).catch((error: any) => {
                 const errors = error.response?.data?.errors || error.response?.data?.extensions?.errors || [];
                 
                 if (errors && Array.isArray(errors) && errors.length > 0) {
@@ -138,17 +143,14 @@ export default function DepartmentsForm () {
                     startIcon={<ArrowBackIcon />}
                     sx={{ mb: 2 }}
                 >
-                    Back to Departments
+                    {t('general.back')}
                 </Button>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     {id ? <EditIcon sx={{ fontSize: 32, mr: 2, color: 'primary.main' }} /> : <AddIcon sx={{ fontSize: 32, mr: 2, color: 'primary.main' }} />}
                     <Typography variant="h4" component="h1">
-                        {id ? 'Edit Department' : t('departments.create.new')}
+                        {id ? t('departments.update') : t('departments.create.new')}
                     </Typography>
                 </Box>
-                <Typography variant="body1" color="text.secondary">
-                    {id ? 'Update the department details below' : 'Fill in the details to create a new department'}
-                </Typography>
             </Box>
 
             <Paper elevation={2} sx={{ p: 3 }}>
@@ -156,14 +158,15 @@ export default function DepartmentsForm () {
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                         <TextField
                             fullWidth
-                            label="Department Name"
+                            label={t('department.name')}
                             name="departmentName"
                             value={department.departmentName}
                             onChange={handleInputChange}
-                            placeholder="Enter department name"
+                            placeholder={t('departments.name.placeholder')}
                             required
+                            disabled={!canEditDepartmentName}
                             error={!!errors.departmentName}
-                            helperText={errors.departmentName}
+                            helperText={errors.departmentName || (!canEditDepartmentName && isEditMode ? t('department.name.edit.restriction') : '')}
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
@@ -174,11 +177,11 @@ export default function DepartmentsForm () {
                         />
                         
                         <FormControl fullWidth error={!!errors.managerId}>
-                            <InputLabel>Manager</InputLabel>
+                            <InputLabel>{t('department.manager')}</InputLabel>
                             <Select
                                 value={department.managerId || ''}
                                 onChange={(e) => setDepartment(prev => ({ ...prev, managerId: e.target.value ? Number(e.target.value) : null }))}
-                                label="Manager"
+                                label={t('department.manager')}
                             >
                                 <MenuItem value="">
                                     <em>None</em>
@@ -194,12 +197,12 @@ export default function DepartmentsForm () {
                         
                         <TextField
                             fullWidth
-                            label="Number of People"
+                            label={t('departments.number.of.people')}
                             name="numberOfPeople"
                             type="number"
                             value={department.numberOfPeople}
                             onChange={handleInputChange}
-                            placeholder="Enter number of people"
+                            placeholder={t('departments.number.of.people')}
                             required
                             error={!!errors.numberOfPeople}
                             helperText={errors.numberOfPeople}
@@ -217,7 +220,7 @@ export default function DepartmentsForm () {
 
                         {department.createdDate && (
                             <Typography variant="body2" color="text.secondary">
-                                Created: {new Date(department.createdDate).toLocaleString()}
+                                {t('department.created.date')} {new Date(department.createdDate).toLocaleString()}
                             </Typography>
                         )}
                         
@@ -230,7 +233,7 @@ export default function DepartmentsForm () {
                                 type="button"
                                 startIcon={<CancelIcon />}
                             >
-                                Cancel
+                                {t('general.back')}
                             </Button>
                             <Button
                                 type="submit"
@@ -238,7 +241,7 @@ export default function DepartmentsForm () {
                                 size="large"
                                 startIcon={id ? <SaveIcon /> : <AddIcon />}
                             >
-                                {id ? 'Update Department' : 'Create Department'}
+                                {id ? t('departments.update') : t('department.add.new')}
                             </Button>
                         </Box>
                     </Box>

@@ -8,4 +8,5 @@
     rejectionReason: string | null | undefined,
     departmentId: number | null | undefined,
     departmentName: string | null | undefined,
+    createdByUsername: string | null | undefined,
 }

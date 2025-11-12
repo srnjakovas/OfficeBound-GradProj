@@ -77,11 +77,12 @@ const apiConnector = {
         await axios.post<number>(`${API_BASE_URL}/departments`, payload);
     },
     
-    editDepartment: async (department: DepartmentDto): Promise<void> => {
+    editDepartment: async (department: DepartmentDto, userId?: number): Promise<void> => {
         const payload = {
             departmentName: department.departmentName,
             managerId: department.managerId || null,
-            numberOfPeople: department.numberOfPeople
+            numberOfPeople: department.numberOfPeople,
+            userId: userId || null
         };
         await axios.put<number>(`${API_BASE_URL}/departments/${department.id}`, payload);
     },
@@ -117,12 +118,13 @@ const apiConnector = {
         return response.data.userAccountRequests;
     },
     
-    reviewAccount: async (userId: number, isApproved: boolean, position: string | null, departmentId: number | null): Promise<void> => {
+    reviewAccount: async (userId: number, isApproved: boolean, position: string | null, departmentId: number | null, setAsBranchManager: boolean = false): Promise<void> => {
         await axios.post(`${API_BASE_URL}/Admin/ReviewAccount`, {
             userId,
             isApproved,
             position,
-            departmentId
+            departmentId,
+            setAsBranchManager
         });
     },
     
@@ -135,9 +137,27 @@ const apiConnector = {
             rejectionReason
         });
     },
+
+    cancelRequest: async (requestId: number, cancellationReason: string, userId?: number): Promise<void> => {
+        await axios.post(`${API_BASE_URL}/Requests/${requestId}/Cancel`, {
+            cancellationReason,
+            userId: userId || null
+        });
+    },
     
     getOfficeResources: async (): Promise<GetOfficeResourcesResponse> => {
         const response = await axios.get<GetOfficeResourcesResponse>(`${API_BASE_URL}/Requests/OfficeResources`);
+        return response.data;
+    },
+
+    deleteUser: async (userId: number, rejectionReason: string): Promise<void> => {
+        await axios.delete(`${API_BASE_URL}/Admin/Users/${userId}`, {
+            data: { rejectionReason }
+        });
+    },
+
+    hasBranchManager: async (): Promise<boolean> => {
+        const response = await axios.get<boolean>(`${API_BASE_URL}/Admin/HasBranchManager`);
         return response.data;
     }
 }
