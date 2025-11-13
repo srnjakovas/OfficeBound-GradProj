@@ -75,6 +75,7 @@ export default function RequestsForm () {
         rejectionReason: undefined,
         departmentId: undefined,
         departmentName: undefined,
+        createdByUsername: undefined
     });
 
     const [departments, setDepartments] = useState<Array<{id: number, name: string}>>([]);
